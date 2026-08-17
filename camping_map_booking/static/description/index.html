@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Camping Map Booking</title>
+<style>
+  :root {
+    --forest: #1e5a3c;
+    --forest-dark: #123d28;
+    --green: #22a06b;
+    --green-soft: #e8f4ee;
+    --ink: #21262b;
+    --muted: #5a6269;
+    --paper: #ffffff;
+    --sand: #faf8f3;
+    --border: #e3e0d8;
+    --free: #198754;
+    --occupied: #f58181;
+    --not-suitable: #dc3545;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--sand);
+    line-height: 1.55;
+  }
+  .oe_container { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  .oe_header {
+    background: var(--forest-dark);
+    color: #fff;
+    padding: 56px 0 64px;
+  }
+  .oe_header .oe_container {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .oe_header img.oe_icon {
+    width: 92px;
+    height: 92px;
+    border-radius: 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    flex: 0 0 auto;
+  }
+  .oe_header h1 {
+    margin: 0 0 6px;
+    font-size: 34px;
+    letter-spacing: -0.02em;
+  }
+  .oe_header p.oe_tagline {
+    margin: 0;
+    font-size: 18px;
+    color: #d7ecdf;
+    max-width: 560px;
+  }
+  .oe_badges { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .oe_badge {
+    display: inline-block;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.28);
+    color: #eafbf2;
+  }
+
+  .oe_screenshot {
+    margin: -40px auto 0;
+    max-width: 980px;
+    padding: 0 24px;
+  }
+  .oe_screenshot img {
+    width: 100%;
+    display: block;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(18,61,40,.25);
+    border: 1px solid var(--border);
+  }
+
+  section { padding: 56px 0; }
+  h2.oe_title {
+    font-size: 26px;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  p.oe_lead {
+    color: var(--muted);
+    font-size: 16.5px;
+    max-width: 640px;
+    margin: 0 0 32px;
+  }
+
+  .oe_grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .oe_card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 22px 24px;
+  }
+  .oe_card .oe_dot {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--green-soft);
+    color: var(--forest);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .oe_card h3 { margin: 0 0 8px; font-size: 16.5px; }
+  .oe_card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+  .oe_diagram {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .oe_diagram img { width: 100%; display: block; border-radius: 8px; }
+
+  .oe_steps { counter-reset: step; list-style: none; margin: 0; padding: 0; }
+  .oe_steps li {
+    counter-increment: step;
+    position: relative;
+    padding: 0 0 26px 46px;
+    border-left: 2px solid var(--border);
+    margin-left: 18px;
+  }
+  .oe_steps li:last-child { border-color: transparent; padding-bottom: 0; }
+  .oe_steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: -19px;
+    top: 0;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--forest);
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .oe_steps strong { display: block; margin-bottom: 3px; }
+  .oe_steps span { color: var(--muted); font-size: 14.5px; }
+
+  .oe_requirements {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .oe_requirements table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .oe_requirements td { padding: 9px 6px; border-top: 1px solid var(--border); }
+  .oe_requirements tr:first-child td { border-top: none; }
+  .oe_requirements td:first-child { color: var(--muted); width: 220px; }
+  code {
+    background: var(--green-soft);
+    color: var(--forest-dark);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 13.5px;
+  }
+
+  footer {
+    background: var(--forest-dark);
+    color: #cfe6da;
+    padding: 34px 0;
+    font-size: 14px;
+  }
+  footer a { color: #fff; }
+  footer .oe_container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+  @media (max-width: 720px) {
+    .oe_grid { grid-template-columns: 1fr; }
+    .oe_header .oe_container { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="oe_header">
+    <div class="oe_container">
+      <img class="oe_icon" src="icon.png" alt="Camping Map Booking icon" />
+      <div>
+        <h1>Camping Map Booking</h1>
+        <p class="oe_tagline">
+          Turn your campsite plan into a clickable map where guests pick a
+          pitch by tapping it - free, occupied and unsuitable spots colored
+          live from your actual bookings.
+        </p>
+        <div class="oe_badges">
+          <span class="oe_badge">Odoo 19.0</span>
+          <span class="oe_badge">Website + Backend</span>
+          <span class="oe_badge">Works with Planning &amp; Renting</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="oe_screenshot">
+    <img src="screenshot_map.jpg" alt="Example interactive campsite map with color-coded pitches and a legend" />
+  </div>
+
+  <section>
+    <div class="oe_container">
+      <h2 class="oe_title">What it does</h2>
+      <p class="oe_lead">
+        Upload any site photo or plan, draw clickable zones over it, and
+        link each zone to the pitches it represents. That's it - the map
+        handles selection, availability and vehicle suitability on its own.
+      </p>
+      <div class="oe_grid">
+        <div class="oe_card">
+          <div class="oe_dot">1</div>
+          <h3>Draw zones on your own image</h3>
+          <p>Outline each pitch, cabin or bungalow as a polygon over your
+             campsite photo or plan - no fixed grid, no generic icons.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">2</div>
+          <h3>Live availability coloring</h3>
+          <p>Zones are colored free, occupied or not suitable in real time,
+             computed from existing <code>planning.slot</code> bookings for
+             the dates being checked.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">3</div>
+          <h3>Vehicle-aware suitability</h3>
+          <p>Restrict a pitch to certain vehicle types (tent, car, caravan,
+             motorhome, camper van) via its planning role - unsuitable
+             pitches are flagged before a guest picks one.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">4</div>
+          <h3>One map, two places</h3>
+          <p>The exact same component shows up during pitch selection at
+             website checkout and in the backend preview - what staff see
+             while calibrating is what guests see live.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">5</div>
+          <h3>Generate zones from resources</h3>
+          <p>Already have pitches set up as resources? One click creates a
+             starter zone for each one, ready to be outlined.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">6</div>
+          <h3>Built-in testing tool</h3>
+          <p>Simulate any stay and vehicle type from the backend "Testing"
+             tab to confirm colors and calibration before publishing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="oe_container">
+      <h2 class="oe_title">Availability, at a glance</h2>
+      <p class="oe_lead">
+        Every zone's color comes from a single configurable source of
+        truth, so the legend on the map always matches what's actually
+        bookable.
+      </p>
+      <div class="oe_diagram">
+        <img src="diagram_availability.png" alt="Free, occupied and not suitable legend" />
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="oe_container">
+      <h2 class="oe_title">Setting it up</h2>
+      <p class="oe_lead">From a blank map to a bookable one, in a few steps.</p>
+      <ol class="oe_steps">
+        <li>
+          <strong>Create a campsite map and upload its image.</strong>
+          <span>Go to Camping Maps and open (or create) a record with your site photo or plan.</span>
+        </li>
+        <li>
+          <strong>Generate or draw zones.</strong>
+          <span>Use "Create Zone for Each Resource" for existing pitches, or add zones by hand and outline each on the image.</span>
+        </li>
+        <li>
+          <strong>Calibrate against the real image.</strong>
+          <span>Compare the overlay to the photo on the "Map Preview" tab and adjust polygon points until they line up.</span>
+        </li>
+        <li>
+          <strong>Test with real dates and a vehicle.</strong>
+          <span>Use the "Testing" tab to preview free/occupied/not-suitable colors for a chosen stay before going live.</span>
+        </li>
+        <li>
+          <strong>Publish.</strong>
+          <span>Once pitches are rentable products, the same map appears automatically during pitch selection at checkout.</span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="oe_container">
+      <h2 class="oe_title">Requirements</h2>
+      <div class="oe_requirements">
+        <table>
+          <tr><td>Odoo version</td><td>19.0</td></tr>
+          <tr><td>Depends on</td><td><code>planning</code>, <code>product</code>, <code>ressource_map</code>, <code>website_sale_renting</code></td></tr>
+          <tr><td>Booking source</td><td>Existing <code>planning.slot</code> reservations - no separate booking calendar to maintain</td></tr>
+          <tr><td>License</td><td>OPL-1</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="oe_container">
+      <span>Camping Map Booking &middot; by mytime.click</span>
+      <span><a href="https://mytime.click">mytime.click</a></span>
+    </div>
+  </footer>
+
+</body>
+</html>
