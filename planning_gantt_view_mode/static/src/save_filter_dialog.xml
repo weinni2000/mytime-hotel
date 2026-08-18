@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="planning_gantt_view_mode.SaveGanttFilterDialog">
+        <Dialog title="title" size="'sm'">
+            <input
+                type="text"
+                class="o_input form-control"
+                t-ref="autofocus"
+                t-model="state.name"
+                placeholder="Filter name"
+                t-on-keydown="(ev) => ev.key === 'Enter' &amp;&amp; this.save()"
+            />
+            <div class="form-check mt-2">
+                <input
+                    type="checkbox"
+                    id="o_planning_gantt_saved_filter_default"
+                    class="form-check-input"
+                    t-model="state.isDefault"
+                />
+                <label
+                    for="o_planning_gantt_saved_filter_default"
+                    class="form-check-label"
+                >
+                    Use by default
+                </label>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="() => this.save()">
+                    Save
+                </button>
+                <button class="btn btn-secondary" t-on-click="() => this.props.close()">
+                    Discard
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>

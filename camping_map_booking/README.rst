@@ -33,6 +33,9 @@ The same map component powers two places:
   "Testing" tabs let staff calibrate zones and simulate a stay/vehicle to
   see exactly what guests will see before it goes live.
 
+Requires Odoo **Enterprise** (the Rental app: ``sale_renting`` /
+``website_sale_renting``).
+
 .. image:: static/description/screenshot_map.jpg
    :alt: Example campsite map with color-coded zones
 

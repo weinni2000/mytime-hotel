@@ -4,6 +4,9 @@ import {PlanningGanttModel} from "@planning/views/planning_gantt/planning_gantt_
 import {PlanningGanttController} from "@planning/views/planning_gantt/planning_gantt_controller";
 import {PlanningGanttRenderer} from "@planning/views/planning_gantt/planning_gantt_renderer";
 import {DomainSelectorDialog} from "@web/core/domain_selector_dialog/domain_selector_dialog";
+import {SaveGanttFilterDialog} from "./save_filter_dialog";
+
+const SAVED_FILTER_MODEL = "planning.gantt.resource.filter";
 
 // Context keys that make Planning expand every resource/role/employee even when
 // they have no shift. Forcing them to false in "watching" mode collapses the
@@ -22,6 +25,8 @@ const DEFAULT_FILTER_DOMAIN = '[("resource_type", "=", "material")]';
 // The toggle state lives on the model so that every consumer (controller
 // buttons and the renderer header) reads/writes the same value and stays in
 // sync. false = planning mode (all bookable rows), true = watching mode.
+// Saved resource filters live here too, for the same reason: the dropdown is
+// shown in both places and must reflect the same list without a double fetch.
 patch(PlanningGanttModel.prototype, {
     setup() {
         super.setup(...arguments);
@@ -32,6 +37,26 @@ patch(PlanningGanttModel.prototype, {
         // `_getDomain` to also drop rows of non-matching resources that DO have
         // shifts (filter_resource_ids alone only controls empty rows).
         this.filterResourceIds = null;
+        this.savedFilters = [];
+    },
+
+    /**
+     * @override
+     * On the first load of a fresh view instance, apply the user's default
+     * saved filter (if any) before the initial fetch, so the Gantt opens
+     * already filtered instead of flashing unfiltered data first.
+     */
+    async load(searchParams) {
+        if (!this._defaultFilterLoaded) {
+            this._defaultFilterLoaded = true;
+            await this.loadSavedFilters();
+            const defaultFilter = this.savedFilters.find((f) => f.is_default);
+            if (defaultFilter) {
+                this.filterDomain = defaultFilter.domain;
+                this.filterActive = true;
+            }
+        }
+        return super.load(searchParams);
     },
 
     async _fetchData(metaData, additionalContext) {
@@ -92,6 +117,38 @@ patch(PlanningGanttModel.prototype, {
         this.filterActive = true;
         this.fetchData();
     },
+
+    async loadSavedFilters() {
+        this.savedFilters = await this.orm.searchRead(
+            SAVED_FILTER_MODEL,
+            [],
+            ["name", "domain", "is_default"]
+        );
+        this.notify();
+    },
+
+    applySavedFilter(savedFilter) {
+        this.setFilterDomain(savedFilter.domain);
+    },
+
+    async deleteSavedFilter(savedFilter) {
+        await this.orm.unlink(SAVED_FILTER_MODEL, [savedFilter.id]);
+        await this.loadSavedFilters();
+    },
+
+    async toggleDefaultFilter(savedFilter) {
+        await this.orm.write(SAVED_FILTER_MODEL, [savedFilter.id], {
+            is_default: !savedFilter.is_default,
+        });
+        await this.loadSavedFilters();
+    },
+
+    async saveCurrentFilterAs(name, isDefault) {
+        await this.orm.create(SAVED_FILTER_MODEL, [
+            {name, domain: this.filterDomain, is_default: isDefault},
+        ]);
+        await this.loadSavedFilters();
+    },
 });
 
 // Opens the domain selector prefilled with the current filter domain. Shared by
@@ -106,14 +163,30 @@ function openFilterDomainDialog(component) {
     });
 }
 
+// Opens the "save current filter" name prompt. Shared by the controller and
+// the renderer, same reasoning as `openFilterDomainDialog` above.
+function openSaveFilterDialog(component) {
+    component.env.services.dialog.add(SaveGanttFilterDialog, {
+        onSave: (name, isDefault) => component.model.saveCurrentFilterAs(name, isDefault),
+    });
+}
+
 patch(PlanningGanttController.prototype, {
     editFilterDomain() {
         openFilterDomainDialog(this);
+    },
+
+    saveCurrentFilter() {
+        openSaveFilterDialog(this);
     },
 });
 
 patch(PlanningGanttRenderer.prototype, {
     editFilterDomain() {
         openFilterDomainDialog(this);
+    },
+
+    saveCurrentFilter() {
+        openSaveFilterDialog(this);
     },
 });

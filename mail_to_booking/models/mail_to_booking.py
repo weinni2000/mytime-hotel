@@ -72,6 +72,37 @@ class MailToBooking(models.Model):
     confirm_warning = fields.Text(readonly=True)
     product_match_log = fields.Text(readonly=True)
 
+    def action_load_all_booking_mails(self):
+        server = self.env["fetchmail.server"].sudo().search(
+            [
+                ("mail_to_booking_enabled", "=", True),
+                ("user", "=ilike", "buchungen@weingartmair.eu"),
+                ("server_type", "=", "imap"),
+                ("state", "=", "done"),
+            ],
+            limit=1,
+        )
+        if not server:
+            raise UserError(
+                _(
+                    "No confirmed IMAP incoming mail server was found for "
+                    "buchungen@weingartmair.eu."
+                )
+            )
+
+        server.fetch_mail()
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Booking mails loaded"),
+                "message": _("The booking mailbox has been checked for new mails."),
+                "type": "success",
+                "next": {"type": "ir.actions.client", "tag": "reload"},
+            },
+        }
+
     def action_view_sale_order(self):
         self.ensure_one()
         if not self.sale_order_id:

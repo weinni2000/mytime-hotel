@@ -1,7 +1,7 @@
 {
     "name": "Mail to Booking",
     "summary": "Create camping rental bookings from incoming emails using DeepSeek.",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Sales/Rental",
     "license": "OPL-1",
     "author": "mytime.click",

@@ -3,7 +3,7 @@
     "summary": "Add an OCA timeline view to the booking Planning schedule.",
     "version": "19.0.1.0.4",
     "category": "Human Resources/Planning",
-    "license": "OPL-1",
+    "license": "AGPL-3",
     "author": "mytime.click",
     "website": "https://mytime.click",
     "depends": [
@@ -28,7 +28,7 @@
             "web_timeline/static/src/views/timeline/timeline_canvas.esm.js",
         ],
     },
-    "installable": True,
+    "installable": False,
     "application": False,
     "post_init_hook": "post_init_hook",
 }

@@ -34,6 +34,49 @@
                 >
                     <i class="fa fa-sliders" />
                 </button>
+                <button
+                    type="button"
+                    class="o_planning_resource_filter_saved btn btn-secondary dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    title="Saved resource filters"
+                >
+                    <i class="fa fa-bookmark-o" />
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li t-foreach="model.savedFilters" t-as="savedFilter" t-key="savedFilter.id">
+                        <div class="dropdown-item d-flex align-items-center justify-content-between">
+                            <i
+                                class="fa me-1 cursor-pointer"
+                                t-att-class="savedFilter.is_default ? 'fa-star text-warning' : 'fa-star-o text-muted'"
+                                t-att-title="savedFilter.is_default ? 'Unset as default' : 'Set as default'"
+                                t-on-click.stop="() => model.toggleDefaultFilter(savedFilter)"
+                            />
+                            <span
+                                class="text-truncate flex-grow-1 cursor-pointer"
+                                t-esc="savedFilter.name"
+                                t-on-click="() => model.applySavedFilter(savedFilter)"
+                            />
+                            <i
+                                class="fa fa-trash-o ms-2 text-muted"
+                                title="Delete this saved filter"
+                                t-on-click.stop="() => model.deleteSavedFilter(savedFilter)"
+                            />
+                        </div>
+                    </li>
+                    <li t-if="model.savedFilters.length">
+                        <hr class="dropdown-divider" />
+                    </li>
+                    <li>
+                        <a
+                            href="#"
+                            class="dropdown-item"
+                            t-on-click.prevent="() => this.saveCurrentFilter()"
+                        >
+                            <i class="fa fa-plus me-1" />Save current filter...
+                        </a>
+                    </li>
+                </ul>
             </div>
         </xpath>
     </t>
@@ -76,6 +119,51 @@
                 >
                     <i class="fa fa-sliders" />
                 </button>
+                <div t-if="model.applySavedFilter" class="btn-group" role="group">
+                    <button
+                        type="button"
+                        class="o_planning_resource_filter_saved_grid btn btn-secondary btn-sm py-0 dropdown-toggle"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        title="Saved resource filters"
+                    >
+                        <i class="fa fa-bookmark-o" />
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li t-foreach="model.savedFilters" t-as="savedFilter" t-key="savedFilter.id">
+                            <div class="dropdown-item d-flex align-items-center justify-content-between">
+                                <i
+                                    class="fa me-1 cursor-pointer"
+                                    t-att-class="savedFilter.is_default ? 'fa-star text-warning' : 'fa-star-o text-muted'"
+                                    t-att-title="savedFilter.is_default ? 'Unset as default' : 'Set as default'"
+                                    t-on-click.stop="() => model.toggleDefaultFilter(savedFilter)"
+                                />
+                                <span
+                                    class="text-truncate flex-grow-1 cursor-pointer"
+                                    t-esc="savedFilter.name"
+                                    t-on-click="() => model.applySavedFilter(savedFilter)"
+                                />
+                                <i
+                                    class="fa fa-trash-o ms-2 text-muted"
+                                    title="Delete this saved filter"
+                                    t-on-click.stop="() => model.deleteSavedFilter(savedFilter)"
+                                />
+                            </div>
+                        </li>
+                        <li t-if="model.savedFilters.length">
+                            <hr class="dropdown-divider" />
+                        </li>
+                        <li>
+                            <a
+                                href="#"
+                                class="dropdown-item"
+                                t-on-click.prevent="() => this.saveCurrentFilter()"
+                            >
+                                <i class="fa fa-plus me-1" />Save current filter...
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </b>
         </xpath>
     </t>

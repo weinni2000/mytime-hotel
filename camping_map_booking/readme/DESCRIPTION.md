@@ -14,3 +14,6 @@ The same map component powers two places:
 - **Backend preview** - the `campsite.map` record's "Map Preview" and
   "Testing" tabs let staff calibrate zones and simulate a stay/vehicle to
   see exactly what guests will see before it goes live.
+
+Requires Odoo **Enterprise** (the Rental app: `sale_renting` /
+`website_sale_renting`).

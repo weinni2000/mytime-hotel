@@ -1,6 +1,6 @@
 from odoo.exceptions import UserError
 
-REQUIRED_INDUSTRY_MODULES = "campsite"  # , "industry_real_estate"
+REQUIRED_INDUSTRY_MODULES = ["campsite"]
 
 
 def pre_init_hook(env):

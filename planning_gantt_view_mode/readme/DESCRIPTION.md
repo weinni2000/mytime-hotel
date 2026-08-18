@@ -14,5 +14,18 @@ applied through Planning's `filter_resource_ids`, so empty resources stay
 visible. A second button opens a domain editor prefilled with the current
 domain, letting you change what the filter shows from the frontend.
 
-All controls are available in two places: next to the **Publish** button and
-next to the **Schedule** title in the Gantt grid header.
+A third button, next to the filter controls, opens a dropdown of **saved
+resource filters**: pick one to apply its domain, save the current domain as
+a new named entry, or delete an entry you no longer need. Saved filters are
+personal (only visible to the user who created them) and persist across
+sessions, analogous to the search bar's favorites.
+
+When saving a filter you can tick **Use by default**, or click the star next
+to any already-saved filter in the dropdown to toggle it. The default filter
+(shown with a filled star) is applied automatically every time the Gantt view
+is opened, the same way a default favorite works in the search bar. Only one
+saved filter per user can be the default.
+
+All controls, including the saved-filters dropdown, are available in two
+places: next to the **Publish** button and next to the **Schedule** title in
+the Gantt grid header.

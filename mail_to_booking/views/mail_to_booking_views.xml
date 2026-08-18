@@ -5,6 +5,16 @@
         <field name="model">mail.to.booking</field>
         <field name="arch" type="xml">
             <list editable="bottom" decoration-danger="state == 'no_product'">
+                <header>
+                    <button
+                        name="action_load_all_booking_mails"
+                        type="object"
+                        string="Load all booking mails"
+                        class="btn-primary"
+                        display="always"
+                        confirm="Load every mail from buchungen@weingartmair.eu? Existing messages will be skipped."
+                    />
+                </header>
                 <field name="name" readonly="1" />
                 <field name="sale_channel_id" />
                 <field name="sender" />

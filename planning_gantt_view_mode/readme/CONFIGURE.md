@@ -4,3 +4,6 @@ No configuration is required. Once installed, open any Planning schedule
 
 The view always opens in **Planning mode**; switching to **Watching mode** is a
 per-session choice and is not persisted.
+
+Resource filter domains can be saved for later reuse via the bookmark button
+next to the filter controls. Saved filters are stored per-user.

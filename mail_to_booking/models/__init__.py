@@ -1,4 +1,5 @@
 from . import fetchmail_server
+from . import mail_thread
 from . import mail_to_booking
 from . import mail_to_booking_excluded_email
 from . import mail_to_booking_product_mapping
