@@ -13,6 +13,7 @@
         "booking_engine",
     ],
     "external_dependencies": {"python": ["requests", "pdfminer"]},
+    "images": ["static/description/diagram_flow.png"],
     "data": [
         "security/ir.model.access.csv",
         "views/mail_to_booking_views.xml",

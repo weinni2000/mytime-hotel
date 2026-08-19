@@ -73,21 +73,22 @@ class MailToBooking(models.Model):
     product_match_log = fields.Text(readonly=True)
 
     def action_load_all_booking_mails(self):
-        server = self.env["fetchmail.server"].sudo().search(
-            [
-                ("mail_to_booking_enabled", "=", True),
-                ("user", "=ilike", "buchungen@weingartmair.eu"),
-                ("server_type", "=", "imap"),
-                ("state", "=", "done"),
-            ],
-            limit=1,
+        server = (
+            self.env["fetchmail.server"]
+            .sudo()
+            .search(
+                [
+                    ("mail_to_booking_enabled", "=", True),
+                    ("user", "=ilike", "buchungen@weingartmair.eu"),
+                    ("server_type", "=", "imap"),
+                    ("state", "=", "done"),
+                ],
+                limit=1,
+            )
         )
         if not server:
             raise UserError(
-                _(
-                    "No confirmed IMAP incoming mail server was found for "
-                    "buchungen@weingartmair.eu."
-                )
+                _("No confirmed IMAP incoming mail server was found for " "buchungen@weingartmair.eu.")
             )
 
         server.fetch_mail()

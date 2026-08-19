@@ -8,9 +8,7 @@ class PlanningGanttResourceFilter(models.Model):
 
     name = fields.Char(required=True)
     domain = fields.Char(required=True)
-    user_id = fields.Many2one(
-        "res.users", required=True, default=lambda self: self.env.user
-    )
+    user_id = fields.Many2one("res.users", required=True, default=lambda self: self.env.user)
     is_default = fields.Boolean(string="Default")
 
     def _unset_other_defaults(self):

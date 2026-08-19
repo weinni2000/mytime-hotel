@@ -87,7 +87,9 @@ export class ResourceMap extends Component {
             hoveredZoneId: null,
             selectedZoneId: null,
             // Multiple pitches can be selected at once (one per free resource).
-            selectedItemIds: this.props.selectedItemIds ? [...this.props.selectedItemIds] : [],
+            selectedItemIds: this.props.selectedItemIds
+                ? [...this.props.selectedItemIds]
+                : [],
             // Corner-editing an existing zone (editor only).
             editZoneId: null,
             editPoints: [],
@@ -406,9 +408,7 @@ export class ResourceMap extends Component {
                 byId.set(product.id, product);
             }
         }
-        return this.state.selectedItemIds
-            .map((id) => byId.get(id))
-            .filter(Boolean);
+        return this.state.selectedItemIds.map((id) => byId.get(id)).filter(Boolean);
     }
 
     isSelectedItem(item) {

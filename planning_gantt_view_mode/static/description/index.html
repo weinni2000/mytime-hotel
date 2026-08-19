@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Planning Gantt View Mode</title>
+<style>
+  :root {
+    --amber-dark: #7a3d0e;
+    --amber-deep: #5c2c08;
+    --amber: #e8860f;
+    --amber-soft: #fdf0dd;
+    --ink: #21262b;
+    --muted: #5a6269;
+    --paper: #ffffff;
+    --sand: #fbf8f4;
+    --border: #e7ddcd;
+    --booked: #e8860f;
+    --empty: #e3d6bf;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--sand);
+    line-height: 1.55;
+  }
+  .oe_container { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  .oe_header {
+    background: var(--amber-deep);
+    color: #fff;
+    padding: 56px 0 64px;
+  }
+  .oe_header .oe_container {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .oe_header img.oe_icon {
+    width: 92px;
+    height: 92px;
+    border-radius: 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    flex: 0 0 auto;
+  }
+  .oe_header h1 {
+    margin: 0 0 6px;
+    font-size: 34px;
+    letter-spacing: -0.02em;
+  }
+  .oe_header p.oe_tagline {
+    margin: 0;
+    font-size: 18px;
+    color: #f6e2c8;
+    max-width: 560px;
+  }
+  .oe_badges { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .oe_badge {
+    display: inline-block;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.28);
+    color: #fef4e4;
+  }
+
+  .oe_screenshot {
+    margin: -40px auto 0;
+    max-width: 980px;
+    padding: 0 24px;
+  }
+  .oe_screenshot img {
+    width: 100%;
+    display: block;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(92,44,8,.25);
+    border: 1px solid var(--border);
+  }
+
+  section { padding: 56px 0; }
+  h2.oe_title {
+    font-size: 26px;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  p.oe_lead {
+    color: var(--muted);
+    font-size: 16.5px;
+    max-width: 640px;
+    margin: 0 0 32px;
+  }
+
+  .oe_grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .oe_card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 22px 24px;
+  }
+  .oe_card .oe_dot {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--amber-soft);
+    color: var(--amber-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .oe_card h3 { margin: 0 0 8px; font-size: 16.5px; }
+  .oe_card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+  .oe_diagram {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .oe_diagram svg { width: 100%; height: auto; display: block; }
+
+  .oe_requirements {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .oe_requirements table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .oe_requirements td { padding: 9px 6px; border-top: 1px solid var(--border); }
+  .oe_requirements tr:first-child td { border-top: none; }
+  .oe_requirements td:first-child { color: var(--muted); width: 220px; }
+  code {
+    background: var(--amber-soft);
+    color: var(--amber-deep);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 13.5px;
+  }
+
+  footer {
+    background: var(--amber-deep);
+    color: #f0dcc0;
+    padding: 34px 0;
+    font-size: 14px;
+  }
+  footer a { color: #fff; }
+  footer .oe_container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+  @media (max-width: 720px) {
+    .oe_grid { grid-template-columns: 1fr; }
+    .oe_header .oe_container { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="oe_header">
+    <div class="oe_container">
+      <img class="oe_icon" src="icon.png" alt="Planning Gantt View Mode icon" />
+      <div>
+        <h1>Planning Gantt View Mode</h1>
+        <p class="oe_tagline">
+          Toggle the Planning schedule between a full planning view and a
+          clean, booked-only watching view - plus a reusable resource filter
+          you can save and reload.
+        </p>
+        <div class="oe_badges">
+          <span class="oe_badge">Odoo 19.0</span>
+          <span class="oe_badge">Planning app</span>
+          <span class="oe_badge">Client-side, no data model changes</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="oe_screenshot">
+    <img src="banner.jpg" alt="A whiteboard schedule grid with resource rows and day columns, some cells filled with bookings and others empty" />
+  </div>
+
+  <section>
+    <div class="oe_container">
+      <h2 class="oe_title">What it does</h2>
+      <p class="oe_lead">
+        A small, focused patch on top of the standard Planning Gantt view -
+        no new screens, just extra controls next to <strong>Publish</strong>
+        and next to the <strong>Schedule</strong> title.
+      </p>
+      <div class="oe_grid">
+        <div class="oe_card">
+          <div class="oe_dot">1</div>
+          <h3>Planning / Watching toggle</h3>
+          <p>Planning mode is Odoo's default: every bookable resource, role
+             and employee shows up as a row, even with no shift, so you can
+             plan onto empty rows. Watching mode collapses the schedule down
+             to rows that actually contain a booking, for a clean read-only
+             overview.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">2</div>
+          <h3>Editable resource filter</h3>
+          <p>A Filter button restricts the schedule to resources matching a
+             domain (defaults to <code>resource_type = material</code>,
+             e.g. bungalows, pitches, tools). A domain editor dialog lets you
+             change what it shows without leaving the Gantt view.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">3</div>
+          <h3>Saved resource filters</h3>
+          <p>Save the current filter domain under a name and reload it later
+             from a dropdown, star one as your default so it's applied
+             automatically when the view opens - the same pattern as search
+             favorites. Saved filters are personal, per user.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">4</div>
+          <h3>Available in two places</h3>
+          <p>The toggle, filter and saved-filters dropdown all appear both
+             next to the Publish button and next to the Schedule title in
+             the grid header, so they're at hand wherever you're looking.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="oe_container">
+      <h2 class="oe_title">Two rows, two views</h2>
+      <p class="oe_lead">
+        Same schedule, same data - Watching mode just hides the rows that
+        have nothing booked in them.
+      </p>
+      <div class="oe_diagram">
+        <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing Planning mode, which shows all resource rows including empty ones, with Watching mode, which shows only rows that have a booking">
+          <!-- Panel titles -->
+          <text x="190" y="28" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="16" font-weight="700" fill="#21262b">Planning mode</text>
+          <text x="610" y="28" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="16" font-weight="700" fill="#21262b">Watching mode</text>
+
+          <!-- Planning mode panel -->
+          <g transform="translate(40,46)">
+            <rect x="0" y="0" width="300" height="230" rx="10" fill="#fbf8f4" stroke="#e7ddcd"/>
+            <!-- 5 rows: 2 booked, 3 empty -->
+            <g font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#5a6269">
+              <text x="14" y="26">Room 101</text>
+              <text x="14" y="70">Room 102</text>
+              <text x="14" y="114">Room 103</text>
+              <text x="14" y="158">Housekeeping</text>
+              <text x="14" y="202">Maintenance</text>
+            </g>
+            <line x1="0" y1="40" x2="300" y2="40" stroke="#e7ddcd"/>
+            <line x1="0" y1="84" x2="300" y2="84" stroke="#e7ddcd"/>
+            <line x1="0" y1="128" x2="300" y2="128" stroke="#e7ddcd"/>
+            <line x1="0" y1="172" x2="300" y2="172" stroke="#e7ddcd"/>
+            <line x1="0" y1="216" x2="300" y2="216" stroke="#e7ddcd"/>
+
+            <rect x="120" y="14" width="80" height="14" rx="4" fill="#e8860f"/>
+            <rect x="160" y="58" width="100" height="14" rx="4" fill="#e8860f"/>
+            <rect x="20" y="102" width="260" height="14" rx="4" fill="none" stroke="#e3d6bf" stroke-width="2" stroke-dasharray="3 3"/>
+            <rect x="20" y="146" width="260" height="14" rx="4" fill="none" stroke="#e3d6bf" stroke-width="2" stroke-dasharray="3 3"/>
+            <rect x="20" y="190" width="260" height="14" rx="4" fill="none" stroke="#e3d6bf" stroke-width="2" stroke-dasharray="3 3"/>
+          </g>
+
+          <!-- Arrow -->
+          <g transform="translate(360,150)">
+            <line x1="0" y1="0" x2="60" y2="0" stroke="#c98a3f" stroke-width="2"/>
+            <path d="M60,0 L50,-6 L50,6 Z" fill="#c98a3f"/>
+            <text x="30" y="-14" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#8a7256">toggle</text>
+          </g>
+
+          <!-- Watching mode panel -->
+          <g transform="translate(460,46)">
+            <rect x="0" y="0" width="300" height="230" rx="10" fill="#fbf8f4" stroke="#e7ddcd"/>
+            <g font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#5a6269">
+              <text x="14" y="26">Room 101</text>
+              <text x="14" y="70">Room 102</text>
+            </g>
+            <line x1="0" y1="40" x2="300" y2="40" stroke="#e7ddcd"/>
+            <line x1="0" y1="84" x2="300" y2="84" stroke="#e7ddcd"/>
+
+            <rect x="120" y="14" width="80" height="14" rx="4" fill="#e8860f"/>
+            <rect x="160" y="58" width="100" height="14" rx="4" fill="#e8860f"/>
+
+            <text x="150" y="130" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#a89a82" font-style="italic">empty rows hidden</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="oe_container">
+      <h2 class="oe_title">Requirements</h2>
+      <div class="oe_requirements">
+        <table>
+          <tr><td>Odoo version</td><td>19.0</td></tr>
+          <tr><td>Odoo edition</td><td>Enterprise (patches the Enterprise Planning app's Gantt view)</td></tr>
+          <tr><td>Depends on</td><td><code>planning</code></td></tr>
+          <tr><td>Data model changes</td><td>None to existing models - adds one small model for saved resource filters</td></tr>
+          <tr><td>Access</td><td>Available to users with Planning access (<code>planning.group_planning_user</code>); saved filters are private to each user</td></tr>
+          <tr><td>Configuration</td><td>None - install and use the toggle/filter buttons directly on the Gantt view</td></tr>
+          <tr><td>License</td><td>OPL-1</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="oe_container">
+      <span>Planning Gantt View Mode &middot; by mytime.click</span>
+      <span><a href="https://mytime.click">mytime.click</a></span>
+    </div>
+  </footer>
+
+</body>
+</html>

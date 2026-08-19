@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Mail to Booking</title>
+<style>
+  :root {
+    --deep: #0d3b52;
+    --deep-dark: #082533;
+    --blue: #0f6d8c;
+    --teal: #17b5b0;
+    --teal-soft: #e6f6f5;
+    --ink: #21262b;
+    --muted: #5a6269;
+    --paper: #ffffff;
+    --sand: #f6faf9;
+    --border: #e1e7e6;
+    --warn-bg: #fff4e2;
+    --warn-fg: #a3670f;
+    --skip-bg: #fdeeea;
+    --skip-fg: #a83a2c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--sand);
+    line-height: 1.55;
+  }
+  .oe_container { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  .oe_header {
+    background: var(--deep-dark);
+    color: #fff;
+    padding: 56px 0 64px;
+  }
+  .oe_header .oe_container {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .oe_header img.oe_icon {
+    width: 92px;
+    height: 92px;
+    border-radius: 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    flex: 0 0 auto;
+  }
+  .oe_header h1 {
+    margin: 0 0 6px;
+    font-size: 34px;
+    letter-spacing: -0.02em;
+  }
+  .oe_header p.oe_tagline {
+    margin: 0;
+    font-size: 18px;
+    color: #cdeaf0;
+    max-width: 580px;
+  }
+  .oe_badges { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .oe_badge {
+    display: inline-block;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.28);
+    color: #eafcfa;
+  }
+
+  .oe_screenshot {
+    margin: -40px auto 0;
+    max-width: 980px;
+    padding: 0 24px;
+  }
+  .oe_screenshot img {
+    width: 100%;
+    display: block;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(8,37,51,.25);
+    border: 1px solid var(--border);
+  }
+
+  section { padding: 56px 0; }
+  h2.oe_title {
+    font-size: 26px;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  p.oe_lead {
+    color: var(--muted);
+    font-size: 16.5px;
+    max-width: 660px;
+    margin: 0 0 32px;
+  }
+
+  .oe_grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .oe_card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 22px 24px;
+  }
+  .oe_card .oe_dot {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--teal-soft);
+    color: var(--deep);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .oe_card h3 { margin: 0 0 8px; font-size: 16.5px; }
+  .oe_card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+  .oe_diagram {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .oe_diagram img { width: 100%; display: block; border-radius: 8px; }
+
+  .oe_steps { counter-reset: step; list-style: none; margin: 0; padding: 0; }
+  .oe_steps li {
+    counter-increment: step;
+    position: relative;
+    padding: 0 0 26px 46px;
+    border-left: 2px solid var(--border);
+    margin-left: 18px;
+  }
+  .oe_steps li:last-child { border-color: transparent; padding-bottom: 0; }
+  .oe_steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: -19px;
+    top: 0;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .oe_steps strong { display: block; margin-bottom: 3px; }
+  .oe_steps span { color: var(--muted); font-size: 14.5px; }
+
+  .oe_requirements {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .oe_requirements table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .oe_requirements td { padding: 9px 6px; border-top: 1px solid var(--border); }
+  .oe_requirements tr:first-child td { border-top: none; }
+  .oe_requirements td:first-child { color: var(--muted); width: 220px; }
+  code {
+    background: var(--teal-soft);
+    color: var(--deep-dark);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 13.5px;
+  }
+
+  .oe_note {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--warn-bg);
+    color: #6b4c14;
+    font-size: 14px;
+  }
+
+  footer {
+    background: var(--deep-dark);
+    color: #cfe4e9;
+    padding: 34px 0;
+    font-size: 14px;
+  }
+  footer a { color: #fff; }
+  footer .oe_container { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+  @media (max-width: 720px) {
+    .oe_grid { grid-template-columns: 1fr; }
+    .oe_header .oe_container { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="oe_header">
+    <div class="oe_container">
+      <img class="oe_icon" src="icon.png" alt="Mail to Booking icon" />
+      <div>
+        <h1>Mail to Booking</h1>
+        <p class="oe_tagline">
+          Turn booking-platform emails and direct guest inquiries into
+          ready-to-confirm sale orders automatically, using DeepSeek to read
+          each incoming message for you.
+        </p>
+        <div class="oe_badges">
+          <span class="oe_badge">Odoo 19.0</span>
+          <span class="oe_badge">Mail &amp; Rental</span>
+          <span class="oe_badge">Powered by DeepSeek</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="oe_screenshot">
+    <img src="banner.jpg" alt="Laptop displaying a calendar, representing digital booking management" />
+  </div>
+
+  <section>
+    <div class="oe_container">
+      <h2 class="oe_title">What it does</h2>
+      <p class="oe_lead">
+        Enable it on an incoming mail server and every email that arrives is
+        checked for a camping or vehicle-rental booking - no manual
+        copy-pasting from platform notifications or guest emails into a sale
+        order.
+      </p>
+      <div class="oe_grid">
+        <div class="oe_card">
+          <div class="oe_dot">1</div>
+          <h3>Reads the whole email, PDF included</h3>
+          <p>The message body is cleaned of HTML/CSS noise and, if a PDF is
+             attached (e.g. a booking-platform confirmation), its text is
+             extracted with <code>pdfminer</code> and appended before analysis.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">2</div>
+          <h3>DeepSeek extracts the booking details</h3>
+          <p>Guest name, phone, email, check-in/check-out dates, nights,
+             adults, vehicles, price, platform and a product hint are pulled
+             out of the text in one API call.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">3</div>
+          <h3>Draft sale orders, never silently confirmed blind</h3>
+          <p>A matching <code>sale.order</code> is created and confirmed
+             automatically, with rental dates set when check-in/check-out
+             were found - the full original email stays attached in its
+             chatter.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">4</div>
+          <h3>Product matching that learns</h3>
+          <p>A hint is matched against saved mappings first, then against a
+             channel's allowed products via DeepSeek, or by a unique
+             product-name search - each successful match is saved for next
+             time.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">5</div>
+          <h3>Subject blocklist skips the noise</h3>
+          <p>Recurring non-booking subjects (newsletters, internal alerts)
+             can be blocklisted per sales channel so they're marked "Not a
+             Booking" without ever calling the API.</p>
+        </div>
+        <div class="oe_card">
+          <div class="oe_dot">6</div>
+          <h3>Guest matching without mix-ups</h3>
+          <p>Guests are matched by email, phone or name - and a shared
+             forwarding mailbox address can be excluded so it never gets
+             mistaken for a returning guest's own address.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="oe_container">
+      <h2 class="oe_title">From inbox to booking</h2>
+      <p class="oe_lead">
+        Every step is tracked on a <code>mail.to.booking</code> record, so
+        nothing that couldn't be handled automatically disappears silently -
+        it waits with a clear reason and a one-click fix.
+      </p>
+      <div class="oe_diagram">
+        <img src="diagram_flow.png" alt="Flow diagram: mailbox to subject blocklist to DeepSeek extraction to product matching to confirmed sale order, with fallback branches for non-bookings and unmatched products" />
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="oe_container">
+      <h2 class="oe_title">Setting it up</h2>
+      <p class="oe_lead">From a blank mail server to automatic bookings, in a few steps.</p>
+      <ol class="oe_steps">
+        <li>
+          <strong>Add a DeepSeek API key to the company.</strong>
+          <span>Settings &gt; Users &amp; Companies &gt; Companies, tab "Booking Sync", enter the key used for extraction.</span>
+        </li>
+        <li>
+          <strong>Enable detection on the incoming mail server.</strong>
+          <span>Technical &gt; Email &gt; Incoming Mail Servers, open the booking mailbox and tick "Buchungen per DeepSeek erkennen".</span>
+        </li>
+        <li>
+          <strong>Restrict which products can be matched (optional).</strong>
+          <span>Set "Zulässige Produkte" on the mail server to the room/pitch offers this mailbox may book, so DeepSeek only ever chooses among them.</span>
+        </li>
+        <li>
+          <strong>Review results under Sales &gt; Bookings &gt; Mail-Buchungen.</strong>
+          <span>Records that need a decision show as "Product Missing" or stay in draft - resolve them with the "Choose Product" or "Not a Booking" wizard.</span>
+        </li>
+        <li>
+          <strong>Exclude shared forwarding addresses.</strong>
+          <span>If bookings arrive via a shared inbox (e.g. bookings@yourdomain.eu), add that address under Sales &gt; Bookings &gt; Excluded Emails so it's never used to match an existing guest.</span>
+        </li>
+      </ol>
+      <div class="oe_note">
+        The DeepSeek API key itself is not bundled with this module. A
+        companion module can set it automatically for a given installation;
+        otherwise enter it manually on the company record before enabling
+        detection on any mail server.
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="oe_container">
+      <h2 class="oe_title">Requirements</h2>
+      <div class="oe_requirements">
+        <table>
+          <tr><td>Odoo version</td><td>19.0</td></tr>
+          <tr><td>Depends on</td><td><code>mail</code>, <code>sale_renting</code>, <code>sale_channel</code>, <code>booking_engine</code></td></tr>
+          <tr><td>External Python packages</td><td><code>requests</code>, <code>pdfminer</code></td></tr>
+          <tr><td>External service</td><td>A DeepSeek API key (chat completions endpoint), set on the company record</td></tr>
+          <tr><td>Mail source</td><td>An IMAP/POP incoming mail server (<code>fetchmail.server</code>) with detection enabled</td></tr>
+          <tr><td>License</td><td>OPL-1</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="oe_container">
+      <span>Mail to Booking &middot; by mytime.click</span>
+      <span><a href="https://mytime.click">mytime.click</a></span>
+    </div>
+  </footer>
+
+</body>
+</html>

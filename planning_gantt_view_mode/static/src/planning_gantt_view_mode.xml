@@ -44,8 +44,14 @@
                     <i class="fa fa-bookmark-o" />
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li t-foreach="model.savedFilters" t-as="savedFilter" t-key="savedFilter.id">
-                        <div class="dropdown-item d-flex align-items-center justify-content-between">
+                    <li
+                        t-foreach="model.savedFilters"
+                        t-as="savedFilter"
+                        t-key="savedFilter.id"
+                    >
+                        <div
+                            class="dropdown-item d-flex align-items-center justify-content-between"
+                        >
                             <i
                                 class="fa me-1 cursor-pointer"
                                 t-att-class="savedFilter.is_default ? 'fa-star text-warning' : 'fa-star-o text-muted'"
@@ -130,8 +136,14 @@
                         <i class="fa fa-bookmark-o" />
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li t-foreach="model.savedFilters" t-as="savedFilter" t-key="savedFilter.id">
-                            <div class="dropdown-item d-flex align-items-center justify-content-between">
+                        <li
+                            t-foreach="model.savedFilters"
+                            t-as="savedFilter"
+                            t-key="savedFilter.id"
+                        >
+                            <div
+                                class="dropdown-item d-flex align-items-center justify-content-between"
+                            >
                                 <i
                                     class="fa me-1 cursor-pointer"
                                     t-att-class="savedFilter.is_default ? 'fa-star text-warning' : 'fa-star-o text-muted'"

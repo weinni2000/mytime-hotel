@@ -167,7 +167,8 @@ function openFilterDomainDialog(component) {
 // the renderer, same reasoning as `openFilterDomainDialog` above.
 function openSaveFilterDialog(component) {
     component.env.services.dialog.add(SaveGanttFilterDialog, {
-        onSave: (name, isDefault) => component.model.saveCurrentFilterAs(name, isDefault),
+        onSave: (name, isDefault) =>
+            component.model.saveCurrentFilterAs(name, isDefault),
     });
 }
 
