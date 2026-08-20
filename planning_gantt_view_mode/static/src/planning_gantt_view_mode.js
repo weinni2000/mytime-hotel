@@ -1,8 +1,8 @@
 import {patch} from "@web/core/utils/patch";
 import {Domain} from "@web/core/domain";
-import {PlanningGanttModel} from "@planning/views/planning_gantt/planning_gantt_model";
-import {PlanningGanttController} from "@planning/views/planning_gantt/planning_gantt_controller";
-import {PlanningGanttRenderer} from "@planning/views/planning_gantt/planning_gantt_renderer";
+import {_t} from "@web/core/l10n/translation";
+import {GanttModel} from "@web_gantt/gantt_model";
+import {GanttRenderer} from "@web_gantt/gantt_renderer";
 import {DomainSelectorDialog} from "@web/core/domain_selector_dialog/domain_selector_dialog";
 import {SaveGanttFilterDialog} from "./save_filter_dialog";
 
@@ -20,24 +20,41 @@ const PLANNING_EXPAND_KEYS = [
 
 // Default resource domain used by the filter button. Editable in the UI through
 // the domain selector dialog.
-const DEFAULT_FILTER_DOMAIN = '[("resource_type", "=", "material")]';
+const DEFAULT_RESOURCE_FILTER_DOMAIN = '[("resource_type", "=", "material")]';
 
-// The toggle state lives on the model so that every consumer (controller
-// buttons and the renderer header) reads/writes the same value and stays in
-// sync. false = planning mode (all bookable rows), true = watching mode.
-// Saved resource filters live here too, for the same reason: the dropdown is
-// shown in both places and must reflect the same list without a double fetch.
-patch(PlanningGanttModel.prototype, {
-    setup() {
-        super.setup(...arguments);
+// The toggle state lives on the model rather than the renderer so it survives
+// across re-renders. false = planning mode (all bookable rows), true =
+// watching mode. Saved resource filters live here too, for the same reason.
+patch(GanttModel.prototype, {
+    setup(params, services) {
+        super.setup(params, services);
         this.watchingMode = false;
         this.filterActive = false;
-        this.filterDomain = DEFAULT_FILTER_DOMAIN;
+        this.filterDomain = this.isPlanningResourceGantt
+            ? DEFAULT_RESOURCE_FILTER_DOMAIN
+            : "[]";
         // Resource ids resolved from the filter domain on the last fetch. Used by
         // `_getDomain` to also drop rows of non-matching resources that DO have
         // shifts (filter_resource_ids alone only controls empty rows).
         this.filterResourceIds = null;
         this.savedFilters = [];
+    },
+
+    get ganttViewId() {
+        return this.env.config.viewId;
+    },
+
+    get isPlanningResourceGantt() {
+        return (
+            this.metaData.resModel === "planning.slot" &&
+            "resource_id" in this.metaData.fields
+        );
+    },
+
+    get filterResModel() {
+        return this.isPlanningResourceGantt
+            ? "resource.resource"
+            : this.metaData.resModel;
     },
 
     /**
@@ -66,7 +83,7 @@ patch(PlanningGanttModel.prototype, {
                 extraContext[key] = false;
             }
         }
-        if (this.filterActive) {
+        if (this.filterActive && this.isPlanningResourceGantt) {
             // Resolve the (editable) resource domain to ids. Two things use it:
             //  - `filter_resource_ids`: Planning injects empty rows for these
             //    resources, so matching resources stay visible even with no shift.
@@ -74,7 +91,7 @@ patch(PlanningGanttModel.prototype, {
             //    resources, so non-matching resources that DO have shifts are
             //    dropped instead of appearing anyway.
             const resourceIds = await this.orm.search(
-                "resource.resource",
+                this.filterResModel,
                 new Domain(this.filterDomain).toList()
             );
             this.filterResourceIds = resourceIds;
@@ -93,13 +110,48 @@ patch(PlanningGanttModel.prototype, {
      */
     _getDomain(metaData) {
         const domain = super._getDomain(metaData);
-        if (this.filterActive && this.filterResourceIds) {
+        if (
+            this.filterActive &&
+            this.isPlanningResourceGantt &&
+            this.filterResourceIds
+        ) {
             return Domain.and([
                 domain,
                 [["resource_id", "in", this.filterResourceIds]],
             ]).toList();
         }
+        if (this.filterActive && !this.isPlanningResourceGantt) {
+            return Domain.and([
+                domain,
+                new Domain(this.filterDomain).toList(),
+            ]).toList();
+        }
         return domain;
+    },
+
+    // Plain string properties, not getters: the Owl template extractor that
+    // feeds `i18n export` only picks up static text/attributes, never a
+    // runtime JS expression like `cond ? 'Foo' : 'Bar'` embedded in a
+    // t-esc/t-att. Routing these through `_t()` calls in a real .js file
+    // makes them show up in the .pot like any other translatable string.
+    get watchingModeLabel() {
+        return this.watchingMode ? _t("Watching") : _t("Planning");
+    },
+
+    get watchingModeTitle() {
+        return this.watchingMode
+            ? _t("Switch to planning mode (show all bookable resources)")
+            : _t("Switch to watching mode (show only booked rows)");
+    },
+
+    get filterTitle() {
+        return this.filterActive
+            ? _t("Remove the Gantt filter")
+            : _t("Filter the displayed records");
+    },
+
+    defaultFilterTitle(savedFilter) {
+        return savedFilter.is_default ? _t("Unset as default") : _t("Set as default");
     },
 
     toggleWatchingMode() {
@@ -119,11 +171,14 @@ patch(PlanningGanttModel.prototype, {
     },
 
     async loadSavedFilters() {
-        this.savedFilters = await this.orm.searchRead(
-            SAVED_FILTER_MODEL,
-            [],
-            ["name", "domain", "is_default"]
-        );
+        const viewDomain = this.isPlanningResourceGantt
+            ? ["|", ["view_id", "=", this.ganttViewId], ["view_id", "=", false]]
+            : [["view_id", "=", this.ganttViewId]];
+        this.savedFilters = await this.orm.searchRead(SAVED_FILTER_MODEL, viewDomain, [
+            "name",
+            "domain",
+            "is_default",
+        ]);
         this.notify();
     },
 
@@ -145,26 +200,29 @@ patch(PlanningGanttModel.prototype, {
 
     async saveCurrentFilterAs(name, isDefault) {
         await this.orm.create(SAVED_FILTER_MODEL, [
-            {name, domain: this.filterDomain, is_default: isDefault},
+            {
+                name,
+                domain: this.filterDomain,
+                is_default: isDefault,
+                view_id: this.ganttViewId,
+            },
         ]);
         await this.loadSavedFilters();
     },
 });
 
-// Opens the domain selector prefilled with the current filter domain. Shared by
-// the controller (button next to Publish) and the renderer (grid header).
+// Opens the domain selector prefilled with the current filter domain.
 function openFilterDomainDialog(component) {
     const model = component.model;
     component.env.services.dialog.add(DomainSelectorDialog, {
-        resModel: "resource.resource",
+        resModel: model.filterResModel,
         domain: model.filterDomain,
         isDebugMode: Boolean(component.env.debug),
         onConfirm: (domain) => model.setFilterDomain(domain),
     });
 }
 
-// Opens the "save current filter" name prompt. Shared by the controller and
-// the renderer, same reasoning as `openFilterDomainDialog` above.
+// Opens the "save current filter" name prompt.
 function openSaveFilterDialog(component) {
     component.env.services.dialog.add(SaveGanttFilterDialog, {
         onSave: (name, isDefault) =>
@@ -172,17 +230,7 @@ function openSaveFilterDialog(component) {
     });
 }
 
-patch(PlanningGanttController.prototype, {
-    editFilterDomain() {
-        openFilterDomainDialog(this);
-    },
-
-    saveCurrentFilter() {
-        openSaveFilterDialog(this);
-    },
-});
-
-patch(PlanningGanttRenderer.prototype, {
+patch(GanttRenderer.prototype, {
     editFilterDomain() {
         openFilterDomainDialog(this);
     },

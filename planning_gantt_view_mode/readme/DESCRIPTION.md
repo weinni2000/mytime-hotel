@@ -26,6 +26,5 @@ to any already-saved filter in the dropdown to toggle it. The default filter
 is opened, the same way a default favorite works in the search bar. Only one
 saved filter per user can be the default.
 
-All controls, including the saved-filters dropdown, are available in two
-places: next to the **Publish** button and next to the **Schedule** title in
-the Gantt grid header.
+All controls, including the saved-filters dropdown, sit next to the
+**Schedule** title in the Gantt grid header.

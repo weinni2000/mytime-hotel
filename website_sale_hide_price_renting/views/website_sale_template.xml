@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- website_sale_renting.rental_products_price adds a div AFTER
+        div[name='product_price'] (a sibling, not nested inside it) holding the
+        rental total price (o_renting_total_price). website_sale_hide_price only
+        guards the original div[name='product_price'], so that sibling always
+        rendered regardless of the hide-price setting. Extend its own t-if
+        instead of the price div's. -->
+    <template id="product_price_renting" inherit_id="website_sale.product_price">
+        <xpath
+            expr="//div[contains(@t-if, 'is_rental') and contains(@t-if, 'prevent_zero_price_sale')]"
+            position="attributes"
+        >
+            <attribute
+                name="t-if"
+                add="website and website.website_show_price and not product.website_hide_price"
+                separator=" and "
+            />
+        </xpath>
+    </template>
+
+    <!-- website_sale_renting.rental_product adds a standalone "Pricing" rate
+        table (before #product_documents) on the product page, independent of
+        div[name='product_price'] entirely. -->
+    <template id="product_renting_pricing_table" inherit_id="website_sale.product">
+        <xpath
+            expr="//t[contains(@t-if, 'is_rental') and contains(@t-if, 'accordion_specs_item')]"
+            position="attributes"
+        >
+            <attribute
+                name="t-if"
+                add="website and website.website_show_price and not product.website_hide_price"
+                separator=" and "
+            />
+        </xpath>
+    </template>
+
+    <!-- Same rate table, rendered inside the specs/info accordion instead when
+        that layout option is active. -->
+    <template
+        id="product_accordion_renting_pricing_table"
+        inherit_id="website_sale.product_accordion"
+    >
+        <xpath
+            expr="//div[hasclass('accordion-item') and contains(@t-if, 'is_rental') and contains(@t-if, 'accordion_specs_item')]"
+            position="attributes"
+        >
+            <attribute
+                name="t-if"
+                add="website and website.website_show_price and not product.website_hide_price"
+                separator=" and "
+            />
+        </xpath>
+    </template>
+</odoo>

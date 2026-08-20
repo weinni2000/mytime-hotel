@@ -2,7 +2,7 @@
     "name": "Planning Gantt View Mode",
     "summary": "Toggle the Planning schedule between planning mode (all bookable"
     " resources) and watching mode (only booked rows).",
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.2.0",
     "category": "Human Resources/Planning",
     "license": "OPL-1",
     "author": "mytime.click",
@@ -15,10 +15,8 @@
         "security/planning_gantt_resource_filter_security.xml",
     ],
     "assets": {
-        # The Planning gantt view (PlanningGanttModel/Controller and its
-        # templates) is shipped in the lazy backend bundle, so our patch and
-        # template inheritance must live in the same bundle to resolve the
-        # `@planning/views/planning_gantt/**` imports.
+        # Gantt is shipped in the lazy backend bundle, so the generic model and
+        # renderer patches must be loaded in that same bundle.
         "web.assets_backend_lazy": [
             "planning_gantt_view_mode/static/src/**/*",
         ],

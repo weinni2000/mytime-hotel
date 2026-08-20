@@ -1,92 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
-    <t t-inherit="planning.PlanningGanttView.Buttons" t-inherit-mode="extension">
-        <xpath expr="//button[hasclass('o_gantt_button_send_all')]" position="after">
-            <button
-                type="button"
-                class="o_planning_view_mode_toggle btn btn-secondary"
-                t-att-title="model.watchingMode ? 'Switch to planning mode (show all bookable resources)' : 'Switch to watching mode (show only booked rows)'"
-                t-on-click="() => model.toggleWatchingMode()"
-            >
-                <i
-                    class="fa me-1"
-                    t-att-class="model.watchingMode ? 'fa-eye' : 'fa-pencil-square-o'"
-                />
-                <t t-esc="model.watchingMode ? 'Watching' : 'Planning'" />
-            </button>
-            <div class="btn-group" role="group">
-                <button
-                    type="button"
-                    class="o_planning_resource_filter btn btn-secondary"
-                    t-att-class="{ active: model.filterActive }"
-                    t-att-title="model.filterActive ? 'Remove the resource filter' : 'Filter the displayed resources'"
-                    t-on-click="() => model.toggleFilter()"
-                >
-                    <i class="fa fa-filter me-1" />
-                    Filter
-                </button>
-                <button
-                    type="button"
-                    class="o_planning_resource_filter_edit btn btn-secondary"
-                    title="Edit the resource filter domain"
-                    t-on-click="() => this.editFilterDomain()"
-                >
-                    <i class="fa fa-sliders" />
-                </button>
-                <button
-                    type="button"
-                    class="o_planning_resource_filter_saved btn btn-secondary dropdown-toggle"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                    title="Saved resource filters"
-                >
-                    <i class="fa fa-bookmark-o" />
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li
-                        t-foreach="model.savedFilters"
-                        t-as="savedFilter"
-                        t-key="savedFilter.id"
-                    >
-                        <div
-                            class="dropdown-item d-flex align-items-center justify-content-between"
-                        >
-                            <i
-                                class="fa me-1 cursor-pointer"
-                                t-att-class="savedFilter.is_default ? 'fa-star text-warning' : 'fa-star-o text-muted'"
-                                t-att-title="savedFilter.is_default ? 'Unset as default' : 'Set as default'"
-                                t-on-click.stop="() => model.toggleDefaultFilter(savedFilter)"
-                            />
-                            <span
-                                class="text-truncate flex-grow-1 cursor-pointer"
-                                t-esc="savedFilter.name"
-                                t-on-click="() => model.applySavedFilter(savedFilter)"
-                            />
-                            <i
-                                class="fa fa-trash-o ms-2 text-muted"
-                                title="Delete this saved filter"
-                                t-on-click.stop="() => model.deleteSavedFilter(savedFilter)"
-                            />
-                        </div>
-                    </li>
-                    <li t-if="model.savedFilters.length">
-                        <hr class="dropdown-divider" />
-                    </li>
-                    <li>
-                        <a
-                            href="#"
-                            class="dropdown-item"
-                            t-on-click.prevent="() => this.saveCurrentFilter()"
-                        >
-                            <i class="fa fa-plus me-1" />Save current filter...
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </xpath>
-    </t>
-
     <t t-inherit="web_gantt.GanttRenderer.Header" t-inherit-mode="extension">
         <xpath expr="//b[hasclass('o_gantt_title')]" position="replace">
             <b
@@ -98,7 +12,7 @@
                     t-if="model.toggleWatchingMode"
                     type="button"
                     class="o_planning_view_mode_toggle_grid btn btn-secondary btn-sm py-0"
-                    t-att-title="model.watchingMode ? 'Switch to planning mode (show all bookable resources)' : 'Switch to watching mode (show only booked rows)'"
+                    t-att-title="model.watchingModeTitle"
                     t-on-click.stop="() => model.toggleWatchingMode()"
                 >
                     <i
@@ -111,7 +25,7 @@
                     type="button"
                     class="o_planning_resource_filter_grid btn btn-secondary btn-sm py-0"
                     t-att-class="{ active: model.filterActive }"
-                    t-att-title="model.filterActive ? 'Remove the resource filter' : 'Filter the displayed resources'"
+                    t-att-title="model.filterTitle"
                     t-on-click.stop="() => model.toggleFilter()"
                 >
                     <i class="fa fa-filter" />
@@ -120,7 +34,7 @@
                     t-if="model.setFilterDomain"
                     type="button"
                     class="o_planning_resource_filter_edit_grid btn btn-secondary btn-sm py-0"
-                    title="Edit the resource filter domain"
+                    title="Edit the Gantt filter domain"
                     t-on-click.stop="() => this.editFilterDomain()"
                 >
                     <i class="fa fa-sliders" />
@@ -131,7 +45,7 @@
                         class="o_planning_resource_filter_saved_grid btn btn-secondary btn-sm py-0 dropdown-toggle"
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
-                        title="Saved resource filters"
+                        title="Saved Gantt filters"
                     >
                         <i class="fa fa-bookmark-o" />
                     </button>
@@ -147,7 +61,7 @@
                                 <i
                                     class="fa me-1 cursor-pointer"
                                     t-att-class="savedFilter.is_default ? 'fa-star text-warning' : 'fa-star-o text-muted'"
-                                    t-att-title="savedFilter.is_default ? 'Unset as default' : 'Set as default'"
+                                    t-att-title="model.defaultFilterTitle(savedFilter)"
                                     t-on-click.stop="() => model.toggleDefaultFilter(savedFilter)"
                                 />
                                 <span

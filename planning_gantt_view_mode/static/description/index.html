@@ -181,7 +181,7 @@
   </header>
 
   <div class="oe_screenshot">
-    <img src="banner.jpg" alt="A whiteboard schedule grid with resource rows and day columns, some cells filled with bookings and others empty" />
+    <img src="screenshot_gantt.jpg" alt="The Planning schedule Gantt view with the Planning/Watching toggle, Filter button and saved-filters dropdown next to the Schedule title" />
   </div>
 
   <section>
@@ -189,8 +189,8 @@
       <h2 class="oe_title">What it does</h2>
       <p class="oe_lead">
         A small, focused patch on top of the standard Planning Gantt view -
-        no new screens, just extra controls next to <strong>Publish</strong>
-        and next to the <strong>Schedule</strong> title.
+        no new screens, just extra controls next to the
+        <strong>Schedule</strong> title in the grid header.
       </p>
       <div class="oe_grid">
         <div class="oe_card">
@@ -220,10 +220,10 @@
         </div>
         <div class="oe_card">
           <div class="oe_dot">4</div>
-          <h3>Available in two places</h3>
-          <p>The toggle, filter and saved-filters dropdown all appear both
-             next to the Publish button and next to the Schedule title in
-             the grid header, so they're at hand wherever you're looking.</p>
+          <h3>Lives in the grid header</h3>
+          <p>The toggle, filter and saved-filters dropdown sit right next to
+             the Schedule title, in the same sticky corner of the grid no
+             matter how far you scroll or zoom the timeline.</p>
         </div>
       </div>
     </div>
@@ -236,59 +236,8 @@
         Same schedule, same data - Watching mode just hides the rows that
         have nothing booked in them.
       </p>
-      <div class="oe_diagram">
-        <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing Planning mode, which shows all resource rows including empty ones, with Watching mode, which shows only rows that have a booking">
-          <!-- Panel titles -->
-          <text x="190" y="28" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="16" font-weight="700" fill="#21262b">Planning mode</text>
-          <text x="610" y="28" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="16" font-weight="700" fill="#21262b">Watching mode</text>
-
-          <!-- Planning mode panel -->
-          <g transform="translate(40,46)">
-            <rect x="0" y="0" width="300" height="230" rx="10" fill="#fbf8f4" stroke="#e7ddcd"/>
-            <!-- 5 rows: 2 booked, 3 empty -->
-            <g font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#5a6269">
-              <text x="14" y="26">Room 101</text>
-              <text x="14" y="70">Room 102</text>
-              <text x="14" y="114">Room 103</text>
-              <text x="14" y="158">Housekeeping</text>
-              <text x="14" y="202">Maintenance</text>
-            </g>
-            <line x1="0" y1="40" x2="300" y2="40" stroke="#e7ddcd"/>
-            <line x1="0" y1="84" x2="300" y2="84" stroke="#e7ddcd"/>
-            <line x1="0" y1="128" x2="300" y2="128" stroke="#e7ddcd"/>
-            <line x1="0" y1="172" x2="300" y2="172" stroke="#e7ddcd"/>
-            <line x1="0" y1="216" x2="300" y2="216" stroke="#e7ddcd"/>
-
-            <rect x="120" y="14" width="80" height="14" rx="4" fill="#e8860f"/>
-            <rect x="160" y="58" width="100" height="14" rx="4" fill="#e8860f"/>
-            <rect x="20" y="102" width="260" height="14" rx="4" fill="none" stroke="#e3d6bf" stroke-width="2" stroke-dasharray="3 3"/>
-            <rect x="20" y="146" width="260" height="14" rx="4" fill="none" stroke="#e3d6bf" stroke-width="2" stroke-dasharray="3 3"/>
-            <rect x="20" y="190" width="260" height="14" rx="4" fill="none" stroke="#e3d6bf" stroke-width="2" stroke-dasharray="3 3"/>
-          </g>
-
-          <!-- Arrow -->
-          <g transform="translate(360,150)">
-            <line x1="0" y1="0" x2="60" y2="0" stroke="#c98a3f" stroke-width="2"/>
-            <path d="M60,0 L50,-6 L50,6 Z" fill="#c98a3f"/>
-            <text x="30" y="-14" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="10.5" fill="#8a7256">toggle</text>
-          </g>
-
-          <!-- Watching mode panel -->
-          <g transform="translate(460,46)">
-            <rect x="0" y="0" width="300" height="230" rx="10" fill="#fbf8f4" stroke="#e7ddcd"/>
-            <g font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#5a6269">
-              <text x="14" y="26">Room 101</text>
-              <text x="14" y="70">Room 102</text>
-            </g>
-            <line x1="0" y1="40" x2="300" y2="40" stroke="#e7ddcd"/>
-            <line x1="0" y1="84" x2="300" y2="84" stroke="#e7ddcd"/>
-
-            <rect x="120" y="14" width="80" height="14" rx="4" fill="#e8860f"/>
-            <rect x="160" y="58" width="100" height="14" rx="4" fill="#e8860f"/>
-
-            <text x="150" y="130" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="11" fill="#a89a82" font-style="italic">empty rows hidden</text>
-          </g>
-        </svg>
+      <div class="oe_diagram" style="padding:0; overflow:hidden;">
+        <img src="two_views_comparison.jpg" alt="Side-by-side screenshots comparing Planning mode, which shows every resource row including empty ones like Continuity Tester, with Watching mode, which hides rows that have nothing booked" style="width:100%; display:block;" />
       </div>
     </div>
   </section>

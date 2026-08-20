@@ -3,19 +3,21 @@ from odoo import api, fields, models
 
 class PlanningGanttResourceFilter(models.Model):
     _name = "planning.gantt.resource.filter"
-    _description = "Saved resource filter for the Planning Gantt view"
+    _description = "Saved filter for a Gantt view"
     _order = "name"
 
     name = fields.Char(required=True)
     domain = fields.Char(required=True)
     user_id = fields.Many2one("res.users", required=True, default=lambda self: self.env.user)
     is_default = fields.Boolean(string="Default")
+    view_id = fields.Many2one("ir.ui.view", ondelete="cascade", index=True)
 
     def _unset_other_defaults(self):
         for record in self:
             self.search(
                 [
                     ("user_id", "=", record.user_id.id),
+                    ("view_id", "=", record.view_id.id),
                     ("id", "!=", record.id),
                     ("is_default", "=", True),
                 ]

@@ -1,0 +1,180 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* planning_gantt_view_mode
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-19 08:21+0000\n"
+"PO-Revision-Date: 2026-08-19 08:21+0000\n"
+"Last-Translator: mytime.click\n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: planning_gantt_view_mode
+#: model:ir.model.fields,field_description:planning_gantt_view_mode.field_planning_gantt_resource_filter__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: planning_gantt_view_mode
+#: model:ir.model.fields,field_description:planning_gantt_view_mode.field_planning_gantt_resource_filter__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: planning_gantt_view_mode
+#: model:ir.model.fields,field_description:planning_gantt_view_mode.field_planning_gantt_resource_filter__is_default
+msgid "Default"
+msgstr "Predeterminado"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.xml:0
+msgid "Delete this saved filter"
+msgstr "Eliminar este filtro guardado"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/save_filter_dialog.xml:0
+msgid "Discard"
+msgstr "Descartar"
+
+#. module: planning_gantt_view_mode
+#: model:ir.model.fields,field_description:planning_gantt_view_mode.field_planning_gantt_resource_filter__display_name
+msgid "Display Name"
+msgstr "Nombre para mostrar"
+
+#. module: planning_gantt_view_mode
+#: model:ir.model.fields,field_description:planning_gantt_view_mode.field_planning_gantt_resource_filter__domain
+msgid "Domain"
+msgstr "Dominio"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.xml:0
+msgid "Edit the resource filter domain"
+msgstr "Editar el dominio del filtro de recursos"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.xml:0
+msgid "Filter"
+msgstr "Filtro"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/save_filter_dialog.xml:0
+msgid "Filter name"
+msgstr "Nombre del filtro"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.js:0
+msgid "Filter the displayed resources"
+msgstr "Filtrar los recursos mostrados"
+
+#. module: planning_gantt_view_mode
+#: model:ir.model.fields,field_description:planning_gantt_view_mode.field_planning_gantt_resource_filter__id
+msgid "ID"
+msgstr "ID"
+
+#. module: planning_gantt_view_mode
+#: model:ir.model.fields,field_description:planning_gantt_view_mode.field_planning_gantt_resource_filter__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: planning_gantt_view_mode
+#: model:ir.model.fields,field_description:planning_gantt_view_mode.field_planning_gantt_resource_filter__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: planning_gantt_view_mode
+#: model:ir.model.fields,field_description:planning_gantt_view_mode.field_planning_gantt_resource_filter__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.js:0
+msgid "Planning"
+msgstr "Planificación"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.js:0
+msgid "Remove the resource filter"
+msgstr "Quitar el filtro de recursos"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/save_filter_dialog.xml:0
+msgid "Save"
+msgstr "Guardar"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/save_filter_dialog.js:0
+msgid "Save Resource Filter"
+msgstr "Guardar filtro de recursos"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.xml:0
+msgid "Save current filter..."
+msgstr "Guardar filtro actual..."
+
+#. module: planning_gantt_view_mode
+#: model:ir.model,name:planning_gantt_view_mode.model_planning_gantt_resource_filter
+msgid "Saved resource filter for the Planning Gantt view"
+msgstr "Filtro de recursos guardado para la vista Gantt de Planificación"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.xml:0
+msgid "Saved resource filters"
+msgstr "Filtros de recursos guardados"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.js:0
+msgid "Set as default"
+msgstr "Establecer por defecto"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.js:0
+msgid "Switch to planning mode (show all bookable resources)"
+msgstr "Cambiar al modo de planificación (mostrar todos los recursos reservables)"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.js:0
+msgid "Switch to watching mode (show only booked rows)"
+msgstr "Cambiar al modo de observación (mostrar solo las filas con reservas)"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.js:0
+msgid "Unset as default"
+msgstr "Quitar como predeterminado"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/save_filter_dialog.xml:0
+msgid "Use by default"
+msgstr "Usar por defecto"
+
+#. module: planning_gantt_view_mode
+#: model:ir.model.fields,field_description:planning_gantt_view_mode.field_planning_gantt_resource_filter__user_id
+msgid "User"
+msgstr "Usuario"
+
+#. module: planning_gantt_view_mode
+#. odoo-javascript
+#: code:addons/planning_gantt_view_mode/static/src/planning_gantt_view_mode.js:0
+msgid "Watching"
+msgstr "Observando"
