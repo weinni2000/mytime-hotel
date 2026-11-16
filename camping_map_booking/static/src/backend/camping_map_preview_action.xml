@@ -3,9 +3,11 @@
     <t t-name="camping_map_booking.CampingMapPreviewAction">
         <div class="o_camping_map_booking o_camping_map_backend_preview p-3">
             <ResourceMap
+                t-if="state.mapImageUrl"
                 zones="state.zones"
-                mapImageUrl="'/camping_map_booking/static/src/img/camping_map.png'"
+                mapImageUrl="state.mapImageUrl"
             />
+            <p t-else="" class="text-muted mb-0" t-out="state.emptyMessage" />
         </div>
     </t>
 </templates>

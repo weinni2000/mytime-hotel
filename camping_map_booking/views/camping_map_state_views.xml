@@ -26,6 +26,7 @@
         name="Map States"
         action="camping_map_state_action"
         parent="camping_maps_menu"
+        groups="sales_team.group_sale_manager"
         sequence="20"
     />
 </odoo>

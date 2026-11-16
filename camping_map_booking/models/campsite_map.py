@@ -1,6 +1,7 @@
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, timezone
+from zoneinfo import ZoneInfo
 
-from odoo import api, fields, models
+from odoo import Command, api, fields, models
 
 
 class CampsiteMap(models.Model):
@@ -50,18 +51,21 @@ class CampsiteMap(models.Model):
 
     def action_generate_zones_from_resources(self):
         self.ensure_one()
-        assigned_resource_ids = self.env["camping.map.zone"].search([]).resource_ids.ids
+        Zone = self.env["camping.map.zone"]
+        assigned_resource_ids = Zone.search([]).resource_ids.ids
         resources = self.env["resource.resource"].search(
             [("id", "not in", assigned_resource_ids), ("resource_type", "=", "material")]
         )
-        for resource in resources:
-            self.env["camping.map.zone"].create(
+        Zone.create(
+            [
                 {
                     "name": resource.name,
                     "map_id": self.id,
-                    "resource_ids": [(6, 0, [resource.id])],
+                    "resource_ids": [Command.set(resource.ids)],
                 }
-            )
+                for resource in resources
+            ]
+        )
 
     def _legend_position(self):
         """Configured legend position, or 'none' when the legend is hidden."""
@@ -89,6 +93,21 @@ class CampsiteMap(models.Model):
         url = f"/web/image/campsite.map/{self.id}/image"
         # Cache-buster so a newly uploaded image isn't served stale by the browser.
         return f"{url}?unique={self.write_date.isoformat()}" if self.write_date else url
+
+    def _to_utc_naive(self, date):
+        """User-local date, as the naive UTC datetime Odoo stores.
+
+        The check dates are entered (and defaulted) in the user's timezone,
+        while planning slots are stored in UTC: combining the date with
+        midnight directly would shift the stay window by the user's UTC
+        offset and count bookings of the neighbouring night.
+        """
+        self.ensure_one()
+        if not date:
+            return False
+        tz = ZoneInfo(self.env.user.tz or "UTC")
+        local_midnight = datetime.combine(date, time.min, tzinfo=tz)
+        return local_midnight.astimezone(timezone.utc).replace(tzinfo=None)
 
     @api.depends(
         "image",
@@ -141,22 +160,22 @@ class CampsiteMap(models.Model):
         "legend_position",
     )
     def _compute_test_preview_data(self):
+        # One query for every state's colors, shared by all the zones below.
+        colors_by_code = self.env["camping.map.state"]._get_colors_map()
         for record in self:
             # Color every pitch on this map from the map's test parameters
             # (checked vehicle + stay range), reusing the per-zone availability logic.
             # Nights only: a night spans [date 00:00, next date 00:00), so the stay
             # covers [check-in 00:00, check-out 00:00) and the check-out day is not
             # itself a booked night.
-            start = record.availability_check_start
-            end = record.availability_check_end
-            start_dt = datetime.combine(start, time.min) if start else False
-            end_dt = datetime.combine(end, time.min) if end else False
+            start_dt = record._to_utc_naive(record.availability_check_start)
+            end_dt = record._to_utc_naive(record.availability_check_end)
             shapes = []
             for zone in record.zone_ids:
                 state = (
                     zone._get_availability_state(record.vehicle_type_id, start_dt, end_dt) if start_dt else False
                 )
-                shapes += zone._get_map_shapes(state)
+                shapes += zone._get_map_shapes(state, colors_by_code.get(state))
             record.test_preview_data = {
                 "map_id": record.id if isinstance(record.id, int) else False,
                 "image_url": record._image_url(),

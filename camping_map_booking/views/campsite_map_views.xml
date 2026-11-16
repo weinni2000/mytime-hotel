@@ -103,6 +103,7 @@
         name="Campsite Maps"
         action="campsite_map_action"
         parent="camping_maps_menu"
+        groups="sales_team.group_sale_manager"
         sequence="5"
     />
 </odoo>

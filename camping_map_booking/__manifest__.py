@@ -1,7 +1,7 @@
 {
     "name": "Camping Map Booking",
     "summary": "Interactive campsite map with clickable areas linking to rentable pitches.",
-    "version": "19.0.1.1.7",
+    "version": "19.0.1.1.8",
     "category": "Sales/Rental",
     "license": "OPL-1",
     "author": "mytime.click",

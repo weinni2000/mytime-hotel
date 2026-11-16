@@ -121,12 +121,21 @@ export class CampsiteMapPreviewField extends Component {
             });
             return;
         }
+        const zone = this.state.zones.find(({id}) => id === this.state.selectedZoneId);
+        if (!zone) {
+            // The zone list can be refreshed from the record while a zone is
+            // still selected; saving would then store points for a zone the
+            // button no longer knows how to draw.
+            this.notification.add(_t("The selected zone is no longer available."), {
+                type: "warning",
+            });
+            return;
+        }
         const points = this.draftPoints;
         await this.orm.write("camping.map.zone", [this.state.selectedZoneId], {
             map_id: mapId,
             points,
         });
-        const zone = this.state.zones.find(({id}) => id === this.state.selectedZoneId);
         this.state.shapes = this.state.shapes.filter(
             ({zone_id: zoneId}) => zoneId !== zone.id
         );

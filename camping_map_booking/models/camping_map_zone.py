@@ -56,15 +56,23 @@ class CampingMapZone(models.Model):
         if not self.resource_ids:
             return False
         start = start or fields.Datetime.now()
-        states = {self._get_resource_state(resource, vehicle_type, start, end) for resource in self.resource_ids}
+        busy_resource_ids = self._get_busy_resource_ids(start, end)
+        states = {
+            self._get_resource_state(resource, vehicle_type, start, end, busy_resource_ids)
+            for resource in self.resource_ids
+        }
         if STATE_FREE in states:
             return STATE_FREE
         return STATE_OCCUPIED if STATE_OCCUPIED in states else STATE_NOT_SUITABLE
 
-    def _get_resource_state(self, resource, vehicle_type, start, end=None):
+    def _get_resource_state(self, resource, vehicle_type, start, end=None, busy_resource_ids=None):
         if vehicle_type and not self._is_vehicle_allowed(resource, vehicle_type):
             return STATE_NOT_SUITABLE
-        return STATE_FREE if self.is_resource_free(resource, start, end) else STATE_OCCUPIED
+        if busy_resource_ids is None:
+            busy_resource_ids = self._get_busy_resource_ids(start, end, resource)
+        if resource.id in busy_resource_ids:
+            return STATE_OCCUPIED
+        return STATE_FREE
 
     def _is_vehicle_allowed(self, resource, vehicle_type):
         # Vehicle suitability comes from the resource's planning role(s)
@@ -73,21 +81,38 @@ class CampingMapZone(models.Model):
         role_allowed = resource.role_ids.allowed_vehicle_type_ids
         return not role_allowed or vehicle_type in role_allowed
 
-    def is_resource_free(self, resource, start, end=None):
+    def _get_busy_resource_ids(self, start, end=None, resources=None):
+        """Ids of the resources booked during the stay, in a single query."""
+        self.ensure_one()
+        resources = resources or self.resource_ids
+        if not resources:
+            return set()
+        slots = self.env["planning.slot"].search(
+            [("resource_id", "in", resources.ids), *self._overlap_domain(start, end)]
+        )
+        return set(slots.resource_id.ids)
+
+    @staticmethod
+    def _overlap_domain(start, end=None):
         # Range check when an end is given (stay across nights), otherwise a
         # single-instant check. Two intervals overlap iff each starts before the
         # other ends: slot.start < end and slot.end > start.
         if end and end > start:
-            overlap = [("start_datetime", "<", end), ("end_datetime", ">", start)]
-        else:
-            overlap = [("start_datetime", "<=", start), ("end_datetime", ">", start)]
-        return not self.env["planning.slot"].search_count([("resource_id", "=", resource.id), *overlap])
+            return [("start_datetime", "<", end), ("end_datetime", ">", start)]
+        return [("start_datetime", "<=", start), ("end_datetime", ">", start)]
 
-    def _get_map_shapes(self, state=False):
+    def _is_resource_free(self, resource, start, end=None, busy_resource_ids=None):
+        if busy_resource_ids is None:
+            busy_resource_ids = self._get_busy_resource_ids(start, end, resource)
+        return resource.id not in busy_resource_ids
+
+    def _get_map_shapes(self, state=False, colors=None):
         self.ensure_one()
         products = self._get_map_items()
         if not self.points:
             return []
+        if colors is None:
+            colors = self.env["camping.map.state"]._colors_for(state)
         return [
             {
                 "id": f"zone-{self.id}",
@@ -100,7 +125,7 @@ class CampingMapZone(models.Model):
                 "state": state,
                 # Colors resolved from the camping.map.state model so the map
                 # renders straight from that single source of truth.
-                "colors": self.env["camping.map.state"]._colors_for(state),
+                "colors": colors,
             }
         ]
 

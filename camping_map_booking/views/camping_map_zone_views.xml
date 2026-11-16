@@ -75,6 +75,7 @@
         id="camping_maps_menu"
         name="Maps"
         parent="booking_engine.booking_engine_rooms_menu"
+        groups="sales_team.group_sale_manager"
         sequence="3"
     />
 
@@ -83,6 +84,7 @@
         name="Camping Map Zones"
         action="camping_map_zone_action"
         parent="camping_maps_menu"
+        groups="sales_team.group_sale_manager"
         sequence="10"
     />
 </odoo>

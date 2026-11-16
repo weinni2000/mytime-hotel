@@ -22,6 +22,7 @@
         name="Vehicle Types"
         action="camping_vehicle_type_action"
         parent="camping_maps_menu"
+        groups="sales_team.group_sale_manager"
         sequence="15"
     />
 </odoo>

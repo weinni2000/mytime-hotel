@@ -35,9 +35,10 @@ class CampingMapState(models.Model):
     sequence = fields.Integer(default=10)
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        ("code_uniq", "unique(code)", "Each camping map state code must be unique."),
-    ]
+    _code_uniq = models.Constraint(
+        "unique(code)",
+        "Each camping map state code must be unique.",
+    )
 
     @api.model
     def _get_frontend_map(self):
@@ -56,6 +57,18 @@ class CampingMapState(models.Model):
                 "label": state.name or "",
             }
         return result
+
+    @api.model
+    def _get_colors_map(self):
+        """code -> {fill, stroke, hover} for every active state, in one query.
+
+        Same data as `_colors_for`, for callers that color several zones in a
+        row: fetching the map once avoids one search per zone.
+        """
+        return {
+            code: {key: value for key, value in colors.items() if key != "label"}
+            for code, colors in self._get_frontend_map().items()
+        }
 
     @api.model
     def _colors_for(self, code):
