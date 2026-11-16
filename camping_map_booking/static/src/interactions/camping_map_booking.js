@@ -16,17 +16,59 @@ export class CampingMapBooking extends Interaction {
             .filter((value) => Number.isInteger(value) && value > 0);
         const legend = JSON.parse(this.el.dataset.legend || "[]");
         const legendPosition = this.el.dataset.legendPosition || "none";
-        const props = {zones, mapImageUrl, selectedItemIds, legend, legendPosition};
+        const products = JSON.parse(this.el.dataset.products || "[]");
+        const defaultProductId = this.el.dataset.defaultProductId
+            ? Number(this.el.dataset.defaultProductId)
+            : false;
+        const props = {
+            zones,
+            mapImageUrl,
+            selectedItemIds,
+            legend,
+            legendPosition,
+            products,
+            defaultProductId,
+            startDateValue: this.el.dataset.startDate || "",
+            endDateValue: this.el.dataset.endDate || "",
+        };
+        // Start/End are shared, order-wide values (see _apply_pitch_filters):
+        // editing either one, from any row, resubmits the plain GET filters
+        // form to reload the page with the new value. Vehicle type is set
+        // once on the Camping step and isn't editable from here anymore, so
+        // its hidden input is just carried along unchanged on submit.
+        props.onFiltersChange = (startDate, endDate) => {
+            const form = document.getElementById(this.el.dataset.filtersFormId);
+            const startDateInput = document.getElementById(
+                this.el.dataset.startDateInputId
+            );
+            const endDateInput = document.getElementById(
+                this.el.dataset.endDateInputId
+            );
+            if (!form) {
+                return;
+            }
+            if (startDateInput) {
+                startDateInput.value = startDate;
+            }
+            if (endDateInput) {
+                endDateInput.value = endDate;
+            }
+            form.submit();
+        };
         if (selectable) {
             props.onSelectItem = (items) => {
                 const input = document.getElementById(this.el.dataset.inputId);
-                const button = document.getElementById(this.el.dataset.buttonId);
+                // A selector (not a single id) since the page has both a top
+                // and a bottom Continue button sharing this class.
+                const buttons = document.querySelectorAll(
+                    this.el.dataset.buttonSelector
+                );
                 if (input) {
                     input.value = items.map((item) => item.id).join(",");
                 }
-                if (button) {
+                buttons.forEach((button) => {
                     button.disabled = items.length === 0;
-                }
+                });
             };
         }
         this.mountComponent(mountEl, ResourceMap, props);

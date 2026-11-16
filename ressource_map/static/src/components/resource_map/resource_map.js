@@ -1,4 +1,11 @@
-import {Component, onMounted, onWillUnmount, useRef, useState} from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onRendered,
+    onWillUnmount,
+    useRef,
+    useState,
+} from "@odoo/owl";
 
 // --- Polygon geometry helpers for the proportional slice fill -------------
 
@@ -65,20 +72,50 @@ export class ResourceMap extends Component {
         legend: {type: Array, optional: true},
         legendPosition: {type: String, optional: true},
         labelScale: {type: Number, optional: true},
+        products: {type: Array, optional: true},
+        defaultProductId: {type: [Number, Boolean], optional: true},
+        startDateValue: {type: String, optional: true},
+        endDateValue: {type: String, optional: true},
+        onFiltersChange: {type: Function, optional: true},
     };
 
     setup() {
         this.mapImageRef = useRef("mapImage");
+        this.pitchRowsRef = useRef("pitchRows");
         this.updateAvailableHeight = () => {
             const image = this.mapImageRef.el;
-            if (image) {
-                // Target close to the full window height regardless of where the
-                // image sits on the page - the page scrolls to reveal the rest.
-                this.state.availableHeight = Math.max(120, window.innerHeight - 48);
-                // Drives the legend size so it stays proportional to the map.
-                this.state.mapWidth = image.getBoundingClientRect().width;
+            if (!image) {
+                return;
+            }
+            // Target close to the full window height, minus whatever the
+            // Start/End + product rows above the map are currently taking up
+            // (that block grows/shrinks - e.g. the "no pitch available"
+            // warning appearing - so this has to be measured on every
+            // render, not just once on mount, or the map visibly jumps
+            // whenever that content changes height).
+            const rowsEl = this.pitchRowsRef.el;
+            const rowsHeight = rowsEl ? rowsEl.getBoundingClientRect().height : 0;
+            const nextHeight = Math.round(
+                Math.max(120, window.innerHeight - 48 - rowsHeight)
+            );
+            if (nextHeight !== this.state.availableHeight) {
+                this.state.availableHeight = nextHeight;
+            }
+            // Drives the legend size so it stays proportional to the map.
+            const nextWidth = Math.round(image.getBoundingClientRect().width);
+            if (nextWidth !== this.state.mapWidth) {
+                this.state.mapWidth = nextWidth;
             }
         };
+        // Seeds the first pending row: the last-picked pitch's product (see
+        // the controller's default_pitch_product_id) or the first available
+        // one, so a direct map click works immediately without touching the
+        // Product select first.
+        const initialProductId =
+            this.props.defaultProductId ||
+            (this.props.products && this.props.products.length
+                ? this.props.products[0].id
+                : false);
         this.state = useState({
             naturalWidth: 0,
             naturalHeight: 0,
@@ -86,6 +123,13 @@ export class ResourceMap extends Component {
             mapWidth: 0,
             hoveredZoneId: null,
             selectedZoneId: null,
+            // One or more products the customer is picking pitches for ("Add
+            // another product" opens a second one). Exactly one row is ever
+            // active - via its radio, its Product select, or its own "+1"/
+            // "-1" - and that's the one a direct map click applies to, since
+            // a zone click doesn't name a row the way those controls do.
+            pendingProducts: [initialProductId],
+            activePendingIndex: 0,
             // Multiple pitches can be selected at once (one per free resource).
             selectedItemIds: this.props.selectedItemIds
                 ? [...this.props.selectedItemIds]
@@ -99,6 +143,10 @@ export class ResourceMap extends Component {
             this.updateAvailableHeight();
             window.addEventListener("resize", this.updateAvailableHeight);
         });
+        // Re-measure after every render, not just on mount/resize, so the
+        // map's height stays in sync as the rows above it grow or shrink.
+        // Guarded by the equality checks above against re-triggering itself.
+        onRendered(() => this.updateAvailableHeight());
         onWillUnmount(() =>
             window.removeEventListener("resize", this.updateAvailableHeight)
         );
@@ -152,6 +200,229 @@ export class ResourceMap extends Component {
         }
         const fontPx = Math.max(9, Math.min(14, width * 0.03));
         return `font-size: ${fontPx}px`;
+    }
+
+    onProductChange(ev, pendingIndex) {
+        this.state.pendingProducts[pendingIndex] = Number(ev.target.value);
+        this.state.activePendingIndex = pendingIndex;
+    }
+
+    // Each row is its own distinct product (its Amount is a count of that
+    // product's pitches, so two rows sharing a product would just show the
+    // same number twice) — this is the first product not already open in
+    // another row.
+    onAddPosition() {
+        const usedProductIds = new Set(this.state.pendingProducts);
+        const nextProduct = (this.props.products || []).find(
+            (product) => !usedProductIds.has(product.id)
+        );
+        if (!nextProduct) {
+            return;
+        }
+        this.state.pendingProducts.push(nextProduct.id);
+        this.state.activePendingIndex = this.state.pendingProducts.length - 1;
+    }
+
+    get canAddPosition() {
+        return this.state.pendingProducts.length < (this.props.products || []).length;
+    }
+
+    // The products selectable in one row's Product select: every product
+    // except whichever other rows already have open (see onAddPosition).
+    availableProductsFor(pendingIndex) {
+        const usedElsewhere = new Set(
+            this.state.pendingProducts.filter((_, i) => i !== pendingIndex)
+        );
+        return (this.props.products || []).filter(
+            (product) => !usedElsewhere.has(product.id)
+        );
+    }
+
+    // Closes a row again — always keeps at least one around. Also releases
+    // any pitches already picked for that product, since a closed row can no
+    // longer account for them.
+    onRemovePosition(pendingIndex) {
+        if (this.state.pendingProducts.length <= 1) {
+            return;
+        }
+        const productId = this.state.pendingProducts[pendingIndex];
+        this.selectedItems
+            .filter((item) => item.product_id === productId)
+            .forEach((item) => {
+                const index = this.state.selectedItemIds.indexOf(item.id);
+                if (index !== -1) {
+                    this.state.selectedItemIds.splice(index, 1);
+                }
+            });
+        this.state.pendingProducts.splice(pendingIndex, 1);
+        if (this.state.activePendingIndex >= this.state.pendingProducts.length) {
+            this.state.activePendingIndex = this.state.pendingProducts.length - 1;
+        }
+        this.notifySelection();
+    }
+
+    onSelectRow(pendingIndex) {
+        this.state.activePendingIndex = pendingIndex;
+    }
+
+    // The row a direct map click applies to (a zone click doesn't name a row
+    // the way a specific row's own "+1" does) — the one radio-selected, or
+    // last touched via its Product select or "+1"/"-1".
+    get activeProductId() {
+        return this.state.pendingProducts[this.state.activePendingIndex];
+    }
+
+    // How many pitches of this product are currently picked — shown as each
+    // row's read-only Amount, and what "-1" removes the most recent of.
+    amountFor(productId) {
+        return this.selectedItems.filter((item) => item.product_id === productId)
+            .length;
+    }
+
+    // "-1": drop the most recently added pitch of this product.
+    onRemovePitch(productId) {
+        const items = this.selectedItems.filter(
+            (item) => item.product_id === productId
+        );
+        const last = items[items.length - 1];
+        if (last) {
+            this.removeItem(last.id);
+        }
+    }
+
+    notifyFiltersChange(startDate, endDate) {
+        if (this.props.onFiltersChange) {
+            this.props.onFiltersChange(startDate, endDate);
+        }
+    }
+
+    onStartDateChange(ev) {
+        const newStart = ev.target.value;
+        if (!newStart) {
+            // The field was cleared - nothing valid to submit yet.
+            return;
+        }
+        // Shift End by the same number of days Start just moved, so the stay
+        // length is preserved - the server only accepts the change when
+        // end > start (_apply_pitch_filters), so dragging Start past the old
+        // End without doing this makes the edit silently not stick.
+        let newEnd = this.props.endDateValue;
+        if (this.props.startDateValue && this.props.endDateValue) {
+            const deltaDays = Math.round(
+                (new Date(`${newStart}T00:00:00`) -
+                    new Date(`${this.props.startDateValue}T00:00:00`)) /
+                    86400000
+            );
+            newEnd = this._shiftDate(this.props.endDateValue, deltaDays);
+        }
+        this.notifyFiltersChange(newStart, this._ensureAfter(newEnd, newStart));
+    }
+
+    onEndDateChange(ev) {
+        const newEnd = ev.target.value;
+        if (!newEnd || !this.props.startDateValue) {
+            return;
+        }
+        this.notifyFiltersChange(
+            this.props.startDateValue,
+            this._ensureAfter(newEnd, this.props.startDateValue)
+        );
+    }
+
+    // A valid end date for the given start: end itself when it's genuinely
+    // after start, otherwise start + 1 day. Without this, a stay that was
+    // already degenerate (start == end, e.g. from before this safeguard
+    // existed) stays stuck forever - shifting both dates by the same delta
+    // preserves a zero-length gap just as much as a real one.
+    _ensureAfter(end, start) {
+        if (
+            end &&
+            start &&
+            new Date(`${end}T00:00:00`) > new Date(`${start}T00:00:00`)
+        ) {
+            return end;
+        }
+        return this._shiftDate(start, 1);
+    }
+
+    _shiftDate(dateStr, deltaDays) {
+        const date = new Date(`${dateStr}T00:00:00`);
+        date.setDate(date.getDate() + deltaDays);
+        return date.toISOString().slice(0, 10);
+    }
+
+    // The next still-free pitch matching a given product, wherever it is on
+    // the map — shared by "+1" and the "nothing available" warning below.
+    _findNextMatchingPitch(productId) {
+        if (!productId) {
+            return null;
+        }
+        for (const zone of this.props.zones) {
+            const next = (zone.products || []).find(
+                (product) =>
+                    product.selectable &&
+                    product.product_id === productId &&
+                    !this.state.selectedItemIds.includes(product.id)
+            );
+            if (next) {
+                return next;
+            }
+        }
+        return null;
+    }
+
+    // "+1": auto-assign the next selectable pitch matching that pending
+    // row's product, wherever it is on the map — an alternative to clicking
+    // a specific zone. The row stays open afterwards, so it can be used
+    // again for another of the same product.
+    onAddPitch(pendingIndex) {
+        const next = this._findNextMatchingPitch(
+            this.state.pendingProducts[pendingIndex]
+        );
+        if (next) {
+            this.state.selectedItemIds.push(next.id);
+            this.notifySelection();
+        }
+    }
+
+    // False when a product has no free pitch left anywhere on the map —
+    // every matching zone is greyed out in that case, so this drives a
+    // clear message instead of leaving the customer guessing why nothing
+    // clicks (and disables that row's own "+1").
+    hasAvailablePitchFor(productId) {
+        return Boolean(this._findNextMatchingPitch(productId));
+    }
+
+    productName(productId) {
+        const product = (this.props.products || []).find(
+            (item) => item.id === productId
+        );
+        return product ? product.name : "";
+    }
+
+    // One compact row per pitch already picked, plus one open row per pending
+    // product ("Add another product" adds more of these). Picked rows aren't
+    // stored, they fall out of selectedItems.
+    // One row per product being picked from — Amount (see amountFor) is the
+    // count of pitches already chosen for it, not a separate line per pitch.
+    get rows() {
+        return this.state.pendingProducts.map((productId, pendingIndex) => ({
+            productId,
+            pendingIndex,
+        }));
+    }
+
+    // Whether this zone has a still-selectable pitch for the active pending
+    // product. Used to grey out pitches that don't match, so the customer
+    // can't accidentally book the wrong product from the map.
+    zoneMatchesArmedProduct(zone) {
+        const productId = this.activeProductId;
+        return (zone.products || []).some(
+            (product) =>
+                product.selectable &&
+                product.product_id === productId &&
+                !this.state.selectedItemIds.includes(product.id)
+        );
     }
 
     get hoveredZone() {
@@ -377,9 +648,14 @@ export class ResourceMap extends Component {
     }
 
     selectNextInZone(zone) {
+        // Only a pitch matching the active pending product can be picked, so
+        // clicking the map never silently books the wrong accommodation.
+        const productId = this.activeProductId;
         const next = zone.products.find(
             (product) =>
-                product.selectable && !this.state.selectedItemIds.includes(product.id)
+                product.selectable &&
+                product.product_id === productId &&
+                !this.state.selectedItemIds.includes(product.id)
         );
         if (next) {
             this.state.selectedItemIds.push(next.id);
@@ -474,6 +750,13 @@ export class ResourceMap extends Component {
         }
         if (this.isEditingZone(zone)) {
             classes.push("o_camping_map_zone_editing");
+        }
+        if (
+            this.props.onSelectItem &&
+            !this.isSelectedZone(zone) &&
+            !this.zoneMatchesArmedProduct(zone)
+        ) {
+            classes.push("o_camping_map_zone_disabled");
         }
         return classes.join(" ");
     }
