@@ -1,10 +1,11 @@
 {
     "name": "Resource Map",
-    "version": "19.0.1.0.2",
+    "version": "20.0.1.0.0",
     "summary": "Reusable OWL resource map component.",
     "category": "Technical",
     "license": "LGPL-3",
-    "author": "mytime.click",
+    "author": "Mytime, mytime.click",
+    "website": "https://github.com/weinni2000/mytime-hotel",
     "depends": ["web"],
     "assets": {
         "web.assets_frontend": [

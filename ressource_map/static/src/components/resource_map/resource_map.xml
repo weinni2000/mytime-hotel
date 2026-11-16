@@ -10,7 +10,7 @@
             <div
                 t-if="props.onSelectItem and props.products and props.products.length"
                 class="o_camping_map_pitch_rows mb-3"
-                t-ref="pitchRows"
+                t-ref="this.pitchRowsRef"
             >
                 <!-- Start/End are the same shared, order-wide value regardless of
                      which pitch is being picked (see onFiltersChange), so they get
@@ -44,7 +44,7 @@
                 </div>
 
                 <p class="text-muted small mb-2">
-                    <i class="fa fa-info-circle me-1" />
+                    <i class="oi me-1" data-icon="info" />
                     You can also click a highlighted pitch directly on the map below to
                     select it.
                 </p>
@@ -74,12 +74,12 @@
                                 t-key="product.id"
                                 t-att-value="product.id"
                                 t-att-selected="product.id === row.productId"
-                                t-esc="product.name"
+                                t-out="product.name"
                             />
                         </select>
                         <div class="o_camping_map_pitch_row_amount text-center">
                             <div class="small text-muted">Amount</div>
-                            <strong t-esc="amountFor(row.productId)" />
+                            <strong t-out="amountFor(row.productId)" />
                         </div>
                         <div class="btn-group" role="group">
                             <button
@@ -108,7 +108,7 @@
                             t-att-disabled="state.pendingProducts.length &lt;= 1"
                             t-on-click="() => this.onRemovePosition(row.pendingIndex)"
                         >
-                            <i class="fa fa-trash-o" />
+                            <i class="oi" data-icon="delete" />
                         </button>
                     </div>
                     <div
@@ -116,7 +116,7 @@
                         class="alert alert-warning py-2 px-3 mt-2 mb-0 small"
                     >
                         No available pitch for <strong
-                        t-esc="productName(row.productId)"
+                        t-out="productName(row.productId)"
                     /> right now — pick a different product, or remove one of your selected
                         pitches to free one up.
                     </div>
@@ -128,14 +128,14 @@
                     t-att-disabled="!canAddPosition"
                     t-on-click="onAddPosition"
                 >
-                    <i class="fa fa-plus me-1" />Add another product
+                    <i class="oi me-1" data-icon="add" />Add another product
                 </button>
             </div>
             <div class="o_camping_map_overlay">
                 <img
                     t-att-src="props.mapImageUrl"
                     class="o_camping_map_img img-fluid"
-                    t-ref="mapImage"
+                    t-ref="this.mapImageRef"
                     t-att-style="state.availableHeight ? 'max-height: ' + state.availableHeight + 'px' : undefined"
                     t-on-load="onImageLoad"
                     alt="Camping map"
@@ -197,9 +197,10 @@
                             >
                                 <i
                                     t-if="zone.symbol"
-                                    t-attf-class="fa {{zone.symbol}}"
+                                    class="oi"
+                                    t-att-data-icon="zone.symbol"
                                 />
-                                <span t-esc="zone.code" />
+                                <span t-out="zone.code" />
                             </div>
                         </foreignObject>
                         <!-- How many pitches the customer has picked in this zone. -->
@@ -212,7 +213,7 @@
                             <text
                                 text-anchor="middle"
                                 dominant-baseline="central"
-                                t-esc="selectedCountForZone(zone)"
+                                t-out="selectedCountForZone(zone)"
                             />
                         </g>
                         <!--
@@ -226,7 +227,7 @@
                             <div
                                 xmlns="http://www.w3.org/1999/xhtml"
                                 class="badge rounded-pill text-bg-dark"
-                                t-esc="zone.name"
+                                t-out="zone.name"
                             />
                         </foreignObject>
                         -->
@@ -296,17 +297,17 @@
                             t-attf-class="o_camping_map_legend_swatch {{entry.color_class or ''}}"
                             t-att-style="entry.color ? ('background-color: ' + entry.color) : undefined"
                         />
-                        <span t-esc="entry.label" />
+                        <span t-out="entry.label" />
                     </div>
                 </div>
                 <div
                     t-if="hoveredZone"
                     class="o_camping_map_tooltip"
-                    t-esc="hoveredZone.name"
+                    t-out="hoveredZone.name"
                 />
                 <div t-if="selectedZone" class="o_camping_map_panel">
                     <div class="o_camping_map_panel_header">
-                        <h4 t-esc="selectedZone.name" />
+                        <h4 t-out="selectedZone.name" />
                         <button
                             type="button"
                             class="btn-close"
@@ -326,10 +327,10 @@
                                     class="o_camping_map_pitch"
                                     t-att-href="product.url"
                                 >
-                                    <span t-esc="product.name" />
+                                    <span t-out="product.name" />
                                     <span
                                         class="o_camping_map_pitch_price"
-                                        t-esc="product.price"
+                                        t-out="product.price"
                                     />
                                 </a>
                                 <button
@@ -339,15 +340,15 @@
                                     t-att-disabled="!product.selectable"
                                     t-on-click="() => this.onItemClick(product)"
                                 >
-                                    <span t-esc="product.name" />
+                                    <span t-out="product.name" />
                                     <small
                                         t-if="product.state"
                                         class="d-block opacity-75"
-                                        t-esc="itemStateLabel(product)"
+                                        t-out="itemStateLabel(product)"
                                     />
                                 </button>
                                 <div t-elif="!product.url" class="o_camping_map_pitch">
-                                    <span t-esc="product.name" />
+                                    <span t-out="product.name" />
                                 </div>
                             </t>
                         </t>
@@ -378,11 +379,11 @@
                     t-key="item.id"
                     class="o_camping_map_selected_chip"
                 >
-                    <span t-esc="item.name" />
+                    <span t-out="item.name" />
                     <small
                         t-if="productName(item.product_id)"
                         class="o_camping_map_selected_chip_product"
-                        t-esc="productName(item.product_id)"
+                        t-out="productName(item.product_id)"
                     />
                     <button
                         type="button"

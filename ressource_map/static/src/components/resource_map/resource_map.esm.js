@@ -1,10 +1,12 @@
 import {
     Component,
     onMounted,
-    onRendered,
+    onPatched,
     onWillUnmount,
-    useRef,
-    useState,
+    proxy,
+    signal,
+    t,
+    useProps,
 } from "@odoo/owl";
 
 // --- Polygon geometry helpers for the proportional slice fill -------------
@@ -34,8 +36,9 @@ function clipVertical(points, cut, keepLeft) {
             out.push(cur);
         }
         if (curIn !== nextIn && next[0] !== cur[0]) {
-            const t = (cut - cur[0]) / (next[0] - cur[0]);
-            out.push([cut, cur[1] + t * (next[1] - cur[1])]);
+            // Position of the cut on the edge, as a ratio of its length.
+            const ratio = (cut - cur[0]) / (next[0] - cur[0]);
+            out.push([cut, cur[1] + ratio * (next[1] - cur[1])]);
         }
     }
     return out;
@@ -58,32 +61,34 @@ function cutXForArea(points, minX, maxX, targetArea) {
 
 export class ResourceMap extends Component {
     static template = "ressource_map.ResourceMap";
-    static props = {
-        zones: Array,
-        mapImageUrl: String,
-        editable: {type: Boolean, optional: true},
-        draftPoints: {type: String, optional: true},
-        onMapClick: {type: Function, optional: true},
-        onRemoveZone: {type: Function, optional: true},
-        onCloseDraft: {type: Function, optional: true},
-        onCornersChanged: {type: Function, optional: true},
-        selectedItemIds: {type: Array, optional: true},
-        onSelectItem: {type: Function, optional: true},
-        legend: {type: Array, optional: true},
-        legendPosition: {type: String, optional: true},
-        labelScale: {type: Number, optional: true},
-        products: {type: Array, optional: true},
-        defaultProductId: {type: [Number, Boolean], optional: true},
-        startDateValue: {type: String, optional: true},
-        endDateValue: {type: String, optional: true},
-        onFiltersChange: {type: Function, optional: true},
-    };
+
+    props = useProps({
+        zones: t.array(),
+        mapImageUrl: t.string(),
+        editable: t.boolean().optional(),
+        draftPoints: t.string().optional(),
+        onMapClick: t.function().optional(),
+        onRemoveZone: t.function().optional(),
+        onCloseDraft: t.function().optional(),
+        onCornersChanged: t.function().optional(),
+        selectedItemIds: t.array().optional(),
+        onSelectItem: t.function().optional(),
+        legend: t.array().optional(),
+        legendPosition: t.string().optional(),
+        labelScale: t.number().optional(),
+        products: t.array().optional(),
+        defaultProductId: t.or([t.number(), t.boolean()]).optional(),
+        startDateValue: t.string().optional(),
+        endDateValue: t.string().optional(),
+        onFiltersChange: t.function().optional(),
+    });
+
+    mapImageRef = signal.ref();
+    pitchRowsRef = signal.ref();
 
     setup() {
-        this.mapImageRef = useRef("mapImage");
-        this.pitchRowsRef = useRef("pitchRows");
         this.updateAvailableHeight = () => {
-            const image = this.mapImageRef.el;
+            const image = this.mapImageRef();
             if (!image) {
                 return;
             }
@@ -93,7 +98,7 @@ export class ResourceMap extends Component {
             // warning appearing - so this has to be measured on every
             // render, not just once on mount, or the map visibly jumps
             // whenever that content changes height).
-            const rowsEl = this.pitchRowsRef.el;
+            const rowsEl = this.pitchRowsRef();
             const rowsHeight = rowsEl ? rowsEl.getBoundingClientRect().height : 0;
             const nextHeight = Math.round(
                 Math.max(120, window.innerHeight - 48 - rowsHeight)
@@ -116,7 +121,7 @@ export class ResourceMap extends Component {
             (this.props.products && this.props.products.length
                 ? this.props.products[0].id
                 : false);
-        this.state = useState({
+        this.state = proxy({
             naturalWidth: 0,
             naturalHeight: 0,
             availableHeight: 0,
@@ -146,7 +151,7 @@ export class ResourceMap extends Component {
         // Re-measure after every render, not just on mount/resize, so the
         // map's height stays in sync as the rows above it grow or shrink.
         // Guarded by the equality checks above against re-triggering itself.
-        onRendered(() => this.updateAvailableHeight());
+        onPatched(() => this.updateAvailableHeight());
         onWillUnmount(() =>
             window.removeEventListener("resize", this.updateAvailableHeight)
         );
@@ -486,7 +491,7 @@ export class ResourceMap extends Component {
     }
 
     eventToImageCoords(ev) {
-        const image = this.mapImageRef.el;
+        const image = this.mapImageRef();
         if (!image) {
             return null;
         }
