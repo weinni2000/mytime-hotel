@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="ressource_map.ResourceMap">
+        <div class="o_camping_map_root">
+            <!-- Kept outside .o_camping_map_overlay on purpose: that container is
+                 position:relative and the SVG below anchors to it with inset:0, so
+                 anything placed inside it before the <img> would push the SVG's
+                 origin down by its own height, misaligning every clickable zone
+                 with the image underneath it. -->
+            <div
+                t-if="props.onSelectItem and props.products and props.products.length"
+                class="o_camping_map_pitch_rows mb-3"
+                t-ref="this.pitchRowsRef"
+            >
+                <!-- Start/End are the same shared, order-wide value regardless of
+                     which pitch is being picked (see onFiltersChange), so they get
+                     one line of their own instead of repeating per pitch row. -->
+                <div class="row g-2 mb-2">
+                    <div class="col-6 col-lg-3">
+                        <label class="form-label mb-1" for="o_camping_map_start">
+                            Start
+                        </label>
+                        <input
+                            id="o_camping_map_start"
+                            class="form-control"
+                            type="date"
+                            t-att-value="props.startDateValue"
+                            t-on-change="onStartDateChange"
+                        />
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <label class="form-label mb-1" for="o_camping_map_end">
+                            End
+                        </label>
+                        <input
+                            id="o_camping_map_end"
+                            class="form-control"
+                            type="date"
+                            t-att-value="props.endDateValue"
+                            t-att-min="props.startDateValue"
+                            t-on-change="onEndDateChange"
+                        />
+                    </div>
+                </div>
+
+                <p class="text-muted small mb-2">
+                    <i class="oi me-1" data-icon="info" />
+                    You can also click a highlighted pitch directly on the map below to
+                    select it.
+                </p>
+
+                <div
+                    t-foreach="rows"
+                    t-as="row"
+                    t-key="row_index"
+                    t-attf-class="o_camping_map_pitch_row mb-2 {{row.pendingIndex === state.activePendingIndex ? 'o_camping_map_pitch_row_active' : ''}}"
+                >
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <input
+                            type="radio"
+                            name="o_camping_map_active_row"
+                            class="form-check-input mt-0 flex-shrink-0"
+                            aria-label="Pick pitches for this product from the map"
+                            t-att-checked="row.pendingIndex === state.activePendingIndex"
+                            t-on-change="() => this.onSelectRow(row.pendingIndex)"
+                        />
+                        <select
+                            class="form-select flex-grow-1 o_camping_map_pitch_row_product"
+                            t-on-change="(ev) => this.onProductChange(ev, row.pendingIndex)"
+                        >
+                            <option
+                                t-foreach="availableProductsFor(row.pendingIndex)"
+                                t-as="product"
+                                t-key="product.id"
+                                t-att-value="product.id"
+                                t-att-selected="product.id === row.productId"
+                                t-out="product.name"
+                            />
+                        </select>
+                        <div class="o_camping_map_pitch_row_amount text-center">
+                            <div class="small text-muted">Amount</div>
+                            <strong t-out="amountFor(row.productId)" />
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                aria-label="Remove one pitch"
+                                t-att-disabled="amountFor(row.productId) === 0"
+                                t-on-click="() => this.onRemovePitch(row.productId)"
+                            >
+                                -1
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                aria-label="Add one pitch"
+                                t-att-disabled="!hasAvailablePitchFor(row.productId)"
+                                t-on-click="() => this.onAddPitch(row.pendingIndex)"
+                            >
+                                +1
+                            </button>
+                        </div>
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            aria-label="Remove this product row"
+                            t-att-disabled="state.pendingProducts.length &lt;= 1"
+                            t-on-click="() => this.onRemovePosition(row.pendingIndex)"
+                        >
+                            <i class="oi" data-icon="delete" />
+                        </button>
+                    </div>
+                    <div
+                        t-if="!hasAvailablePitchFor(row.productId)"
+                        class="alert alert-warning py-2 px-3 mt-2 mb-0 small"
+                    >
+                        No available pitch for <strong
+                        t-out="productName(row.productId)"
+                    /> right now — pick a different product, or remove one of your selected
+                        pitches to free one up.
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm mt-1"
+                    aria-label="Add another position"
+                    t-att-disabled="!canAddPosition"
+                    t-on-click="onAddPosition"
+                >
+                    <i class="oi me-1" data-icon="add" />Add another product
+                </button>
+            </div>
+            <div class="o_camping_map_overlay">
+                <img
+                    t-att-src="props.mapImageUrl"
+                    class="o_camping_map_img img-fluid"
+                    t-ref="this.mapImageRef"
+                    t-att-style="state.availableHeight ? 'max-height: ' + state.availableHeight + 'px' : undefined"
+                    t-on-load="onImageLoad"
+                    alt="Camping map"
+                />
+                <svg
+                    t-if="state.naturalWidth"
+                    class="o_camping_map_svg"
+                    t-attf-viewBox="0 0 {{state.naturalWidth}} {{state.naturalHeight}}"
+                    preserveAspectRatio="xMidYMid meet"
+                    t-on-click="onMapClick"
+                >
+                    <t
+                        t-if="!isDrafting"
+                        t-foreach="props.zones"
+                        t-as="zone"
+                        t-key="zone.id"
+                    >
+                        <polygon
+                            t-att-points="zonePointsString(zone)"
+                            t-att-class="zoneClass(zone)"
+                            t-att-style="zoneStyle(zone)"
+                            t-on-mouseenter="() => this.onZoneHover(zone.id)"
+                            t-on-mouseleave="() => this.onZoneHover(null)"
+                            t-on-click="(ev) => this.onZoneClick(zone, ev)"
+                        />
+                        <!-- Proportional occupancy slices, drawn on top of the
+                             (transparent) zone so clicks still hit the zone. -->
+                        <polygon
+                            t-foreach="zonePolygonParts(zone)"
+                            t-as="part"
+                            t-key="'part-' + zone.id + '-' + part_index"
+                            t-attf-class="o_camping_map_zone_part {{part.colorClass or ''}}"
+                            t-att-points="part.points"
+                            t-att-style="part.color ? ('fill: ' + part.color) : undefined"
+                        />
+                        <g
+                            t-if="props.editable and props.onRemoveZone"
+                            class="o_camping_map_zone_remove"
+                            t-att-transform="'translate(' + zoneTopRight(zone).x + ',' + zoneTopRight(zone).y + ')'"
+                            t-on-click.stop="() => this.onRemoveZoneClick(zone)"
+                        >
+                            <title>Remove polygon</title>
+                            <circle r="12" />
+                            <line x1="-5" y1="-5" x2="5" y2="5" />
+                            <line x1="-5" y1="5" x2="5" y2="-5" />
+                        </g>
+                        <foreignObject
+                            t-if="zone.code"
+                            class="o_camping_map_zone_marker"
+                            t-att-x="zoneMarkerBox(zone).x"
+                            t-att-y="zoneMarkerBox(zone).y"
+                            t-att-width="zoneMarkerBox(zone).width"
+                            t-att-height="zoneMarkerBox(zone).height"
+                        >
+                            <div
+                                xmlns="http://www.w3.org/1999/xhtml"
+                                class="o_camping_map_zone_marker_badge"
+                                t-attf-style="--o-label-font: {{labelFontPx}}px"
+                            >
+                                <i
+                                    t-if="zone.symbol"
+                                    class="oi"
+                                    t-att-data-icon="zone.symbol"
+                                />
+                                <span t-out="zone.code" />
+                            </div>
+                        </foreignObject>
+                        <!-- How many pitches the customer has picked in this zone. -->
+                        <g
+                            t-if="props.onSelectItem and selectedCountForZone(zone)"
+                            class="o_camping_map_zone_counter"
+                            t-att-transform="'translate(' + zoneTopRight(zone).x + ',' + zoneTopRight(zone).y + ')'"
+                        >
+                            <circle r="13" />
+                            <text
+                                text-anchor="middle"
+                                dominant-baseline="central"
+                                t-out="selectedCountForZone(zone)"
+                            />
+                        </g>
+                        <!--
+                        <foreignObject
+                            t-att-x="zoneLabelPosition(zone).x - 90"
+                            t-att-y="zoneLabelPosition(zone).y - 15"
+                            width="180"
+                            height="30"
+                            class="o_camping_map_zone_label"
+                        >
+                            <div
+                                xmlns="http://www.w3.org/1999/xhtml"
+                                class="badge rounded-pill text-bg-dark"
+                                t-out="zone.name"
+                            />
+                        </foreignObject>
+                        -->
+                    </t>
+                    <t t-if="props.editable and state.editZoneId">
+                        <line
+                            t-foreach="state.editPoints"
+                            t-as="corner"
+                            t-key="'edge-' + corner_index"
+                            class="o_camping_map_edge"
+                            t-att-x1="corner[0]"
+                            t-att-y1="corner[1]"
+                            t-att-x2="state.editPoints[(corner_index + 1) % state.editPoints.length][0]"
+                            t-att-y2="state.editPoints[(corner_index + 1) % state.editPoints.length][1]"
+                            t-on-click="(ev) => this.insertCorner(corner_index, ev)"
+                        />
+                        <circle
+                            t-foreach="state.editPoints"
+                            t-as="corner"
+                            t-key="corner_index"
+                            class="o_camping_map_corner"
+                            t-att-cx="corner[0]"
+                            t-att-cy="corner[1]"
+                            r="9"
+                            t-on-pointerdown="(ev) => this.onCornerPointerDown(corner_index, ev)"
+                            t-on-pointermove="(ev) => this.onCornerPointerMove(corner_index, ev)"
+                            t-on-pointerup="(ev) => this.onCornerPointerUp(corner_index, ev)"
+                            t-on-dblclick="(ev) => this.removeCorner(corner_index, ev)"
+                        />
+                    </t>
+                    <polyline
+                        t-if="props.draftPoints"
+                        class="o_camping_map_zone_draft"
+                        t-att-points="props.draftPoints"
+                    />
+                    <g
+                        t-if="props.draftPoints and props.onCloseDraft and draftStartPoint"
+                        class="o_camping_map_draft_close"
+                        t-on-click.stop="onCloseDraftClick"
+                    >
+                        <title>Close and save the zone</title>
+                        <circle
+                            t-att-cx="draftStartPoint[0]"
+                            t-att-cy="draftStartPoint[1]"
+                            r="8"
+                        />
+                        <circle
+                            t-att-cx="draftStartPoint[0]"
+                            t-att-cy="draftStartPoint[1]"
+                            r="3"
+                            class="o_camping_map_draft_close_dot"
+                        />
+                    </g>
+                </svg>
+                <div
+                    t-if="showLegend"
+                    t-att-class="legendClass"
+                    t-att-style="legendStyle"
+                >
+                    <div
+                        t-foreach="props.legend"
+                        t-as="entry"
+                        t-key="entry_index"
+                        class="o_camping_map_legend_item"
+                    >
+                        <span
+                            t-attf-class="o_camping_map_legend_swatch {{entry.color_class or ''}}"
+                            t-att-style="entry.color ? ('background-color: ' + entry.color) : undefined"
+                        />
+                        <span t-out="entry.label" />
+                    </div>
+                </div>
+                <div
+                    t-if="hoveredZone"
+                    class="o_camping_map_tooltip"
+                    t-out="hoveredZone.name"
+                />
+                <div t-if="selectedZone" class="o_camping_map_panel">
+                    <div class="o_camping_map_panel_header">
+                        <h4 t-out="selectedZone.name" />
+                        <button
+                            type="button"
+                            class="btn-close"
+                            aria-label="Close"
+                            t-on-click="closePanel"
+                        />
+                    </div>
+                    <div class="o_camping_map_panel_body">
+                        <t t-if="selectedZone.products.length">
+                            <t
+                                t-foreach="selectedZone.products"
+                                t-as="product"
+                                t-key="product.id"
+                            >
+                                <a
+                                    t-if="product.url"
+                                    class="o_camping_map_pitch"
+                                    t-att-href="product.url"
+                                >
+                                    <span t-out="product.name" />
+                                    <span
+                                        class="o_camping_map_pitch_price"
+                                        t-out="product.price"
+                                    />
+                                </a>
+                                <button
+                                    t-if="!product.url and props.onSelectItem"
+                                    t-att-class="itemClass(product)"
+                                    type="button"
+                                    t-att-disabled="!product.selectable"
+                                    t-on-click="() => this.onItemClick(product)"
+                                >
+                                    <span t-out="product.name" />
+                                    <small
+                                        t-if="product.state"
+                                        class="d-block opacity-75"
+                                        t-out="itemStateLabel(product)"
+                                    />
+                                </button>
+                                <div t-elif="!product.url" class="o_camping_map_pitch">
+                                    <span t-out="product.name" />
+                                </div>
+                            </t>
+                        </t>
+                        <p t-else="" class="text-muted mb-0">
+                            No pitches available in this area yet.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Chosen pitches with a remove (x) control; removing one updates
+                 the map counter/highlight straight away. Kept outside
+                 .o_camping_map_overlay for the same reason the pitch rows
+                 above are: that container is position:relative and the SVG
+                 stretches to its full height via inset:0 with
+                 preserveAspectRatio="xMidYMid meet" - if this chip list grew
+                 taller (e.g. wrapping to more lines as pitches are added)
+                 while living inside that container, the SVG's box would grow
+                 past the image's own height, and centering the (fixed-ratio)
+                 map content within that taller box shifts it down relative
+                 to the image underneath it. -->
+            <div
+                t-if="props.onSelectItem and selectedItems.length"
+                class="o_camping_map_selected"
+            >
+                <span
+                    t-foreach="selectedItems"
+                    t-as="item"
+                    t-key="item.id"
+                    class="o_camping_map_selected_chip"
+                >
+                    <span t-out="item.name" />
+                    <small
+                        t-if="productName(item.product_id)"
+                        class="o_camping_map_selected_chip_product"
+                        t-out="productName(item.product_id)"
+                    />
+                    <button
+                        type="button"
+                        class="btn-close"
+                        aria-label="Remove pitch"
+                        t-on-click="() => this.removeItem(item.id)"
+                    />
+                </span>
+            </div>
+        </div>
+    </t>
+</templates>
