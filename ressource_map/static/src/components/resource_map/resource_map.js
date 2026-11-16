@@ -180,9 +180,9 @@ export class ResourceMap extends Component {
     get showLegend() {
         return Boolean(
             this.props.legend &&
-                this.props.legend.length &&
-                this.props.legendPosition &&
-                this.props.legendPosition !== "none"
+            this.props.legend.length &&
+            this.props.legendPosition &&
+            this.props.legendPosition !== "none"
         );
     }
 

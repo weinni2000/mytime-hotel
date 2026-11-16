@@ -9,8 +9,8 @@
                  with the image underneath it. -->
             <div
                 t-if="props.onSelectItem and props.products and props.products.length"
-                t-ref="pitchRows"
                 class="o_camping_map_pitch_rows mb-3"
+                t-ref="pitchRows"
             >
                 <!-- Start/End are the same shared, order-wide value regardless of
                      which pitch is being picked (see onFiltersChange), so they get
@@ -22,8 +22,8 @@
                         </label>
                         <input
                             id="o_camping_map_start"
-                            type="date"
                             class="form-control"
+                            type="date"
                             t-att-value="props.startDateValue"
                             t-on-change="onStartDateChange"
                         />
@@ -34,8 +34,8 @@
                         </label>
                         <input
                             id="o_camping_map_end"
-                            type="date"
                             class="form-control"
+                            type="date"
                             t-att-value="props.endDateValue"
                             t-att-min="props.startDateValue"
                             t-on-change="onEndDateChange"
@@ -116,8 +116,8 @@
                         class="alert alert-warning py-2 px-3 mt-2 mb-0 small"
                     >
                         No available pitch for <strong
-                            t-esc="productName(row.productId)"
-                        /> right now — pick a different product, or remove one of your selected
+                        t-esc="productName(row.productId)"
+                    /> right now — pick a different product, or remove one of your selected
                         pitches to free one up.
                     </div>
                 </div>
@@ -184,11 +184,11 @@
                         </g>
                         <foreignObject
                             t-if="zone.code"
+                            class="o_camping_map_zone_marker"
                             t-att-x="zoneMarkerBox(zone).x"
                             t-att-y="zoneMarkerBox(zone).y"
                             t-att-width="zoneMarkerBox(zone).width"
                             t-att-height="zoneMarkerBox(zone).height"
-                            class="o_camping_map_zone_marker"
                         >
                             <div
                                 xmlns="http://www.w3.org/1999/xhtml"
@@ -259,8 +259,8 @@
                     </t>
                     <polyline
                         t-if="props.draftPoints"
-                        t-att-points="props.draftPoints"
                         class="o_camping_map_zone_draft"
+                        t-att-points="props.draftPoints"
                     />
                     <g
                         t-if="props.draftPoints and props.onCloseDraft and draftStartPoint"
@@ -323,8 +323,8 @@
                             >
                                 <a
                                     t-if="product.url"
-                                    t-att-href="product.url"
                                     class="o_camping_map_pitch"
+                                    t-att-href="product.url"
                                 >
                                     <span t-esc="product.name" />
                                     <span
@@ -334,8 +334,8 @@
                                 </a>
                                 <button
                                     t-if="!product.url and props.onSelectItem"
-                                    type="button"
                                     t-att-class="itemClass(product)"
+                                    type="button"
                                     t-att-disabled="!product.selectable"
                                     t-on-click="() => this.onItemClick(product)"
                                 >
