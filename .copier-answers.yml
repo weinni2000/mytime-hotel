@@ -1,0 +1,27 @@
+# Do NOT update manually; changes here will be overwritten by Copier
+_commit: 447ed6a
+_src_path: /tmp/oca-repo-tpl
+additional_ruff_rules: []
+convert_readme_fragments_to_markdown: true
+enable_checklog_odoo: true
+generate_requirements_txt: true
+github_check_license: true
+github_ci_extra_env: {}
+github_enable_codecov: true
+github_enable_makepot: true
+github_enable_stale_action: true
+github_enforce_dev_status_compatibility: true
+include_wkhtmltopdf: false
+odoo_test_flavor: Both
+odoo_version: 20.0
+org_name: Mytime
+org_slug: weinni2000
+postgres_image: ''
+rebel_module_groups: []
+repo_description: Odoo addons for the Mytime hotel and camping booking suite.
+repo_name: Mytime Hotel
+repo_slug: mytime-hotel
+repo_website: https://github.com/weinni2000/mytime-hotel
+use_pyproject_toml: true
+use_ruff: true
+
